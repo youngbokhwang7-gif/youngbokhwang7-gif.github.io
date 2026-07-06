@@ -1,0 +1,13 @@
+[
+     {
+       "relation": ["delegate_permission/common.handle_all_urls"],
+       "target": {
+         "namespace": "android_app",
+         "package_name": "io.github.youngbokhwang7_gif.twa",
+         "sha256_cert_fingerprints": [
+           "93:71:BF:50:AF:0C:B2:58:EC:58:BF:DF:CA:D1:48:81:B4:14:8B:0A:61:9E:67:54:84:E8:6D:18:FA:0A:15:B4",
+           "49:DB:AA:C5:FB:2E:7C:B8:00:D7:01:8E:57:55:7C:E9:A9:1F:85:E7:63:28:43:EA:76:95:87:43:DE:00:39:C1"
+         ]
+       }
+     }
+   ]
