@@ -1,1 +1,811 @@
-<!DOCTYPE html><meta charset="utf-8"><title>weave</title><p>weave</p>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>마음근육 · 전전두피질 훈련</title>
+<meta name="description" content="전전두피질을 활성화하고 편도체를 안정시키는 매일 10분 마음근육 훈련. 명상, 만트라, 집착 놓기, 자기존중, 감탄·경외심.">
+<meta name="theme-color" content="#0b0d10">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+:root{
+  --bg:#0b0d10; --bg2:#0f1318; --card:#151a20; --card2:#1b222a;
+  --line:#232b34; --txt:#eef2f6; --dim:#96a1ad; --dim2:#6b7681;
+  --acc:#ffd400; --acc-d:#c7a400; --ok:#5ad19a; --calm:#7cc3ff; --warm:#ff9a6b;
+  --r:18px; --sp:16px;
+  --safe-b:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--txt);
+  font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",system-ui,"Malgun Gothic",sans-serif;
+  line-height:1.55; -webkit-font-smoothing:antialiased;
+  overscroll-behavior-y:none;
+}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+h1,h2,h3,p{margin:0}
+.wrap{max-width:560px;margin:0 auto;padding:0 var(--sp) calc(96px + var(--safe-b));min-height:100dvh}
+
+/* ---------- header ---------- */
+header{padding:26px 0 14px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.hl{font-size:12px;letter-spacing:.14em;color:var(--acc);font-weight:800}
+.h1{font-size:23px;font-weight:800;letter-spacing:-.02em;margin-top:4px}
+.hsub{font-size:12.5px;color:var(--dim);margin-top:3px}
+.streak{
+  flex:0 0 auto;text-align:center;background:var(--card);border:1px solid var(--line);
+  border-radius:14px;padding:8px 12px;min-width:64px
+}
+.streak b{display:block;font-size:20px;font-weight:800;color:var(--acc);line-height:1.15}
+.streak span{font-size:10.5px;color:var(--dim2);letter-spacing:.04em}
+
+/* ---------- cards ---------- */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.card.tight{padding:14px}
+.sec{margin:22px 0 10px;display:flex;align-items:baseline;justify-content:space-between}
+.sec h2{font-size:14px;font-weight:800;letter-spacing:-.01em}
+.sec small{font-size:11.5px;color:var(--dim2)}
+
+/* ---------- mantra ---------- */
+.mantra{
+  position:relative;overflow:hidden;text-align:center;padding:28px 18px 22px;
+  background:radial-gradient(120% 100% at 50% 0%,#1d2733 0%,#11161c 60%,#0e1217 100%);
+  border:1px solid #27313d
+}
+.mantra .line{font-size:22px;font-weight:700;letter-spacing:-.02em;margin:7px 0;opacity:.42;transition:opacity .5s,transform .5s;transform:scale(.97)}
+.mantra .line.on{opacity:1;transform:scale(1);text-shadow:0 0 26px rgba(255,212,0,.28)}
+.mantra .cap{font-size:11px;letter-spacing:.16em;color:var(--acc);font-weight:800;margin-bottom:10px}
+.mantra .cnt{font-size:11.5px;color:var(--dim2);margin-top:14px}
+
+/* ---------- buttons ---------- */
+.btn{
+  display:block;width:100%;text-align:center;background:var(--acc);color:#151004;
+  font-weight:800;font-size:15px;padding:14px;border-radius:14px;letter-spacing:-.01em
+}
+.btn:active{transform:scale(.985)}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--txt);font-weight:700}
+.btn.soft{background:var(--card2);color:var(--txt);font-weight:700}
+.btn.sm{padding:11px;font-size:13.5px;border-radius:12px}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+
+/* ---------- habit list ---------- */
+.habit{display:flex;align-items:center;gap:12px;padding:13px 14px;background:var(--card);
+  border:1px solid var(--line);border-radius:16px;margin-bottom:9px;text-align:left;width:100%}
+.habit:active{background:var(--card2)}
+.habit .ico{flex:0 0 auto;width:38px;height:38px;border-radius:12px;display:grid;place-items:center;
+  font-size:18px;background:var(--card2);border:1px solid var(--line)}
+.habit .tx{flex:1;min-width:0}
+.habit .tx b{display:block;font-size:14.5px;font-weight:700;letter-spacing:-.01em}
+.habit .tx span{display:block;font-size:11.5px;color:var(--dim);margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.habit .chk{flex:0 0 auto;width:24px;height:24px;border-radius:50%;border:1.6px solid #38424e;
+  display:grid;place-items:center;font-size:13px;color:transparent;transition:.18s}
+.habit.done{border-color:rgba(255,212,0,.32);background:linear-gradient(180deg,rgba(255,212,0,.055),transparent)}
+.habit.done .chk{background:var(--acc);border-color:var(--acc);color:#151004}
+.habit.done .tx b{color:var(--acc)}
+
+/* progress */
+.pbar{height:7px;border-radius:99px;background:#20272f;overflow:hidden}
+.pbar i{display:block;height:100%;background:linear-gradient(90deg,var(--acc-d),var(--acc));
+  border-radius:99px;transition:width .45s cubic-bezier(.2,.8,.2,1)}
+.pmeta{display:flex;justify-content:space-between;font-size:11.5px;color:var(--dim);margin-bottom:8px}
+
+/* ---------- breathing ---------- */
+.breathwrap{display:grid;place-items:center;padding:8px 0 0}
+.orb{position:relative;width:min(74vw,270px);aspect-ratio:1;display:grid;place-items:center}
+.orb .ring{position:absolute;inset:0;border-radius:50%;border:1px solid #26303b}
+.orb .ball{
+  width:36%;aspect-ratio:1;border-radius:50%;
+  background:radial-gradient(circle at 34% 30%,#fff2b0,#ffd400 42%,#b98f00 100%);
+  box-shadow:0 0 60px rgba(255,212,0,.30),0 0 140px rgba(255,212,0,.12);
+  transition:transform var(--bt,4s) cubic-bezier(.45,0,.3,1);
+  transform:scale(1)
+}
+.orb.calm .ball{background:radial-gradient(circle at 34% 30%,#dff0ff,#7cc3ff 42%,#2b6fa8 100%);
+  box-shadow:0 0 60px rgba(124,195,255,.30),0 0 140px rgba(124,195,255,.12)}
+.phase{margin-top:18px;text-align:center}
+.phase b{display:block;font-size:26px;font-weight:800;letter-spacing:-.02em}
+.phase span{display:block;font-size:12.5px;color:var(--dim);margin-top:4px;min-height:18px}
+.clock{font-variant-numeric:tabular-nums;font-size:14px;color:var(--dim2);margin-top:10px;text-align:center}
+
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:4px}
+.chip{padding:8px 13px;border-radius:99px;border:1px solid var(--line);background:var(--card);
+  font-size:12.5px;color:var(--dim);font-weight:700}
+.chip.on{background:var(--acc);color:#151004;border-color:var(--acc)}
+
+/* ---------- journal ---------- */
+textarea,input[type=text]{
+  width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:14px;
+  color:var(--txt);padding:13px;font:inherit;font-size:14.5px;resize:none;outline:none
+}
+textarea:focus,input:focus{border-color:#3a4552}
+.entry{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:13px 14px;margin-bottom:9px}
+.entry .top{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.tag{font-size:10.5px;font-weight:800;letter-spacing:.06em;padding:3px 8px;border-radius:99px}
+.tag.awe{background:rgba(255,154,107,.15);color:var(--warm)}
+.tag.letgo{background:rgba(124,195,255,.15);color:var(--calm)}
+.tag.kind{background:rgba(255,212,0,.15);color:var(--acc)}
+.tag.being{background:rgba(90,209,154,.15);color:var(--ok)}
+.entry .date{font-size:11px;color:var(--dim2);margin-left:auto}
+.entry p{font-size:14px;white-space:pre-wrap;word-break:break-word}
+.entry .del{font-size:11px;color:var(--dim2);margin-top:8px}
+
+/* ---------- stats ---------- */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
+.stat b{display:block;font-size:24px;font-weight:800;letter-spacing:-.02em}
+.stat span{font-size:11.5px;color:var(--dim)}
+.bars{display:flex;align-items:flex-end;gap:7px;height:110px;margin-top:6px}
+.bars div{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px;height:100%}
+.bars i{display:block;width:100%;border-radius:7px 7px 4px 4px;background:#242c35;min-height:4px;transition:height .5s}
+.bars i.f{background:linear-gradient(180deg,var(--acc),var(--acc-d))}
+.bars em{font-style:normal;font-size:10.5px;color:var(--dim2)}
+
+/* ---------- tabbar ---------- */
+nav{
+  position:fixed;left:0;right:0;bottom:0;z-index:40;
+  background:rgba(11,13,16,.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-top:1px solid var(--line);padding-bottom:var(--safe-b)
+}
+nav .in{max-width:560px;margin:0 auto;display:flex}
+nav button{flex:1;padding:9px 0 10px;display:flex;flex-direction:column;align-items:center;gap:3px;
+  color:var(--dim2);font-size:10.5px;font-weight:700}
+nav button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+nav button.on{color:var(--acc)}
+
+/* ---------- sheet ---------- */
+.sheet{position:fixed;inset:0;z-index:60;display:none}
+.sheet.on{display:block}
+.sheet .bd{position:absolute;inset:0;background:rgba(0,0,0,.62);backdrop-filter:blur(3px)}
+.sheet .pn{
+  position:absolute;left:0;right:0;bottom:0;max-height:92dvh;overflow:auto;
+  background:var(--bg2);border-radius:24px 24px 0 0;border-top:1px solid var(--line);
+  padding:8px 18px calc(24px + var(--safe-b));animation:up .28s cubic-bezier(.2,.9,.25,1)
+}
+.sheet .pn>.in{max-width:524px;margin:0 auto}
+@keyframes up{from{transform:translateY(24px);opacity:.4}to{transform:none;opacity:1}}
+.grab{width:38px;height:4px;border-radius:99px;background:#2c343d;margin:6px auto 14px}
+.sh-h{font-size:19px;font-weight:800;letter-spacing:-.02em;margin-bottom:4px}
+.sh-s{font-size:13px;color:var(--dim);margin-bottom:14px}
+.why{font-size:12.5px;color:var(--dim);background:var(--card);border:1px solid var(--line);
+  border-radius:14px;padding:12px;margin-bottom:14px;line-height:1.6}
+.why b{color:var(--acc);font-weight:700}
+.prompt{font-size:15px;font-weight:700;color:var(--txt);margin-bottom:10px;letter-spacing:-.01em}
+
+/* ---------- focus mode ---------- */
+.focus{position:fixed;inset:0;z-index:80;background:#07090b;display:none;
+  flex-direction:column;align-items:center;justify-content:center;padding:24px}
+.focus.on{display:flex}
+.focus .x{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:16px;
+  width:40px;height:40px;border-radius:50%;background:#161c23;color:var(--dim);font-size:19px}
+.fm{text-align:center}
+.fm .l{font-size:clamp(22px,7.4vw,32px);font-weight:700;margin:14px 0;opacity:.28;
+  transition:opacity .6s,transform .6s;transform:scale(.96);letter-spacing:-.02em}
+.fm .l.on{opacity:1;transform:scale(1);text-shadow:0 0 34px rgba(255,255,255,.22)}
+.fcnt{position:absolute;bottom:calc(34px + var(--safe-b));text-align:center;width:100%;left:0}
+.fcnt b{font-size:15px;color:var(--acc);font-variant-numeric:tabular-nums}
+.fcnt span{display:block;font-size:11.5px;color:var(--dim2);margin-top:3px}
+
+.toast{position:fixed;left:50%;bottom:calc(84px + var(--safe-b));transform:translateX(-50%) translateY(10px);
+  background:#eef2f6;color:#0b0d10;font-size:13.5px;font-weight:700;padding:11px 18px;border-radius:99px;
+  z-index:90;opacity:0;pointer-events:none;transition:.25s;white-space:nowrap;max-width:88vw}
+.toast.on{opacity:1;transform:translateX(-50%)}
+.hide{display:none!important}
+.muted{color:var(--dim);font-size:13px}
+.empty{text-align:center;color:var(--dim2);font-size:13px;padding:30px 10px}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div>
+      <div class="hl">마음근육 트레이닝</div>
+      <h1 class="h1" id="hTitle">오늘</h1>
+      <div class="hsub" id="hSub">전전두피질 켜기 · 편도체 가라앉히기</div>
+    </div>
+    <div class="streak"><b id="streakN">0</b><span>일 연속</span></div>
+  </header>
+
+  <!-- ===== TODAY ===== -->
+  <section id="v-today">
+    <div class="card mantra" id="mantraCard">
+      <div class="cap">오늘의 만트라</div>
+      <div class="line" data-i="0">침착하고 차분하게</div>
+      <div class="line" data-i="1">즐거운 마음으로</div>
+      <div class="line" data-i="2">나는 할 수 있다</div>
+      <div class="cnt">오늘 <b id="mCount">0</b>회 · 권장 21회</div>
+    </div>
+    <button class="btn" id="goMantra">만트라 낭송 시작</button>
+
+    <div class="sec"><h2>오늘의 훈련</h2><small id="pText">0/7</small></div>
+    <div class="card tight">
+      <div class="pmeta"><span>완료율</span><span id="pPct">0%</span></div>
+      <div class="pbar"><i id="pFill" style="width:0%"></i></div>
+    </div>
+    <div id="habitList"></div>
+  </section>
+
+  <!-- ===== MEDITATION ===== -->
+  <section id="v-med" class="hide">
+    <div class="card">
+      <div class="pmeta" style="margin:0 0 10px"><span>호흡 패턴</span><span id="patHint"></span></div>
+      <div class="chips" id="patChips"></div>
+      <div class="pmeta" style="margin:16px 0 8px"><span>시간</span><span></span></div>
+      <div class="chips" id="minChips"></div>
+    </div>
+    <div class="card">
+      <div class="breathwrap">
+        <div class="orb calm" id="orb"><div class="ring"></div><div class="ball" id="ball"></div></div>
+      </div>
+      <div class="phase"><b id="phName">준비</b><span id="phTip">편안히 앉아 어깨의 힘을 뺍니다</span></div>
+      <div class="clock" id="clock">00:00</div>
+    </div>
+    <div class="row">
+      <button class="btn" id="medBtn">명상 시작</button>
+      <button class="btn ghost hide" id="medStop">종료</button>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <div class="why" style="margin:0">
+        <b>왜 날숨을 길게?</b> 날숨이 들숨보다 길어지면 부교감신경(미주신경)이 우세해지고,
+        경보를 울리던 <b>편도체</b>가 가라앉습니다. 편도체가 조용해질 때 비로소
+        <b>전전두피질</b>이 다시 주도권을 잡습니다.
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== JOURNAL ===== -->
+  <section id="v-log" class="hide">
+    <div class="chips" id="logFilter" style="margin-bottom:12px"></div>
+    <div id="logList"></div>
+  </section>
+
+  <!-- ===== STATS ===== -->
+  <section id="v-stat" class="hide">
+    <div class="grid2">
+      <div class="stat"><b id="sStreak">0</b><span>연속 훈련일</span></div>
+      <div class="stat"><b id="sBest">0</b><span>최고 연속</span></div>
+      <div class="stat"><b id="sMed">0분</b><span>누적 명상</span></div>
+      <div class="stat"><b id="sMan">0</b><span>누적 만트라</span></div>
+    </div>
+    <div class="sec"><h2>최근 7일</h2><small>완료한 훈련 수</small></div>
+    <div class="card"><div class="bars" id="bars"></div></div>
+    <div class="sec"><h2>신경가소성 원리</h2><small>왜 매일인가</small></div>
+    <div class="card">
+      <div class="why" style="margin:0">
+        뇌는 쓰는 대로 바뀝니다. 한 번의 큰 결심보다 <b>짧고 반복되는 자극</b>이
+        시냅스를 다시 배선합니다. 하루 10분, 같은 시간에, 빠짐없이 —
+        3주면 신호가 익숙해지고, 3개월이면 기본값이 바뀝니다.
+        오늘의 1점은 작지만, 끊기지 않은 선이 근육을 만듭니다.
+      </div>
+    </div>
+    <div class="sec"><h2>데이터</h2><small>이 기기에만 저장됩니다</small></div>
+    <div class="row">
+      <button class="btn soft sm" id="expBtn">내보내기</button>
+      <button class="btn soft sm" id="resetBtn">전체 초기화</button>
+    </div>
+  </section>
+</div>
+
+<nav><div class="in">
+  <button data-v="today" class="on"><svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/></svg>오늘</button>
+  <button data-v="med"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.2"/><circle cx="12" cy="12" r="3.2"/></svg>명상</button>
+  <button data-v="log"><svg viewBox="0 0 24 24"><path d="M5 4.5h14v15H5z"/><path d="M8.5 9h7M8.5 13h7M8.5 16.5h4"/></svg>기록</button>
+  <button data-v="stat"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V5M16 20v-7M22 20H2"/></svg>성장</button>
+</div></nav>
+
+<!-- sheet -->
+<div class="sheet" id="sheet">
+  <div class="bd" data-close></div>
+  <div class="pn"><div class="in">
+    <div class="grab"></div>
+    <div class="sh-h" id="shH"></div>
+    <div class="sh-s" id="shS"></div>
+    <div class="why" id="shWhy"></div>
+    <div id="shBody"></div>
+  </div></div>
+</div>
+
+<!-- focus mantra -->
+<div class="focus" id="focus">
+  <button class="x" id="fClose">✕</button>
+  <div class="fm">
+    <div class="l" data-i="0">침착하고 차분하게</div>
+    <div class="l" data-i="1">즐거운 마음으로</div>
+    <div class="l" data-i="2">나는 할 수 있다</div>
+  </div>
+  <div class="fcnt"><b id="fCnt">0 / 21</b><span>화면을 보며 속으로 따라 읽으세요</span></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ========== 상수 ========== */
+var MANTRA = ["침착하고 차분하게","즐거운 마음으로","나는 할 수 있다"];
+var MANTRA_GOAL = 21;
+var KEY = "maum-muscle-v1";
+
+/* 7가지 훈련 — 목적: 전전두피질 활성화 + 편도체 안정화 */
+var HABITS = [
+  { id:"mantra", icon:"🕯", name:"만트라 21회",
+    desc:"침착하고 차분하게 · 즐거운 마음으로 · 나는 할 수 있다",
+    why:"같은 문장을 반복하면 그 회로만 굵어집니다(<b>신경가소성</b>). 불안할 때 튀어나오던 말 대신, 훈련된 이 세 문장이 먼저 나오게 만드는 연습입니다.",
+    type:"link" },
+
+  { id:"breath", icon:"🌊", name:"호흡 명상 5분",
+    desc:"날숨을 길게 — 편도체를 가라앉히는 스위치",
+    why:"들숨보다 <b>날숨이 길어지면</b> 미주신경이 활성화되어 심박이 느려지고 편도체의 경보가 꺼집니다. 뇌가 '지금은 안전하다'고 판단하는 가장 빠른 물리적 신호입니다.",
+    type:"link" },
+
+  { id:"letgo", icon:"🍃", name:"집착 놓기",
+    desc:"붙잡고 있는 것 하나를 적고 흘려보내기",
+    why:"집착은 편도체가 '아직 안 끝났다'며 계속 붙잡고 있는 상태입니다. 언어로 <b>이름을 붙이는 순간(affect labeling)</b> 전전두피질이 개입해 편도체 반응이 실제로 줄어듭니다.",
+    type:"journal", tag:"letgo",
+    prompt:"지금 내가 놓지 못하고 붙잡고 있는 것은?",
+    ph:"예) 그 사람의 한마디 / 이미 지나간 실수 / 내 뜻대로 되어야 한다는 마음",
+    after:"적었으면 숨을 길게 내쉬며 말해보세요 — “이건 내가 어쩔 수 없는 부분이야. 여기까지.”" },
+
+  { id:"being", icon:"🌱", name:"Being 먼저",
+    desc:"무엇을 할까(Doing)보다 어떤 사람으로 있을까",
+    why:"Having → Doing 순서로 살면 뇌는 늘 결핍과 성과에 반응합니다. <b>Being을 먼저</b> 정하면 기준이 내 안으로 들어오고, 외부 평가에 흔들리는 편도체 반응이 줄어듭니다.",
+    type:"journal", tag:"being",
+    prompt:"오늘 나는 어떤 사람으로 존재하고 싶은가?",
+    ph:"예) 서두르지 않는 사람 / 먼저 웃는 사람 / 끝까지 듣는 사람",
+    after:"오늘 하루, 선택이 어려울 때마다 이 문장으로 돌아오세요." },
+
+  { id:"kind", icon:"💛", name:"나를 존중하기",
+    desc:"Be your best friend — 나에게 베프처럼 한마디",
+    why:"자기비난은 <b>자기 자신을 위협으로 인식</b>하게 만들어 편도체를 하루 종일 켜둡니다. 친구에게 하듯 스스로를 대하면 전전두피질의 <b>자기 긍정</b> 회로가 켜지고 행복감이 올라갑니다.",
+    type:"journal", tag:"kind",
+    prompt:"오늘의 나에게, 가장 친한 친구라면 뭐라고 말해줄까?",
+    ph:"예) 그 정도면 충분히 잘했어. 오늘은 좀 쉬어도 돼.",
+    after:"그 문장을 소리 내어 내 이름과 함께 다시 한번 말해보세요." },
+
+  { id:"awe", icon:"✨", name:"감탄 · 경외심",
+    desc:"오늘 나를 멈춰 세운 것 하나",
+    why:"감탄과 경외심(awe)은 <b>자기 중심의 생각을 잠시 꺼주는</b> 몇 안 되는 감정입니다. 걱정 루프가 끊기고 전전두피질이 넓은 시야로 전환됩니다.",
+    type:"journal", tag:"awe",
+    prompt:"오늘 '와…' 하고 잠시 멈춘 순간은?",
+    ph:"예) 퇴근길 하늘색 / 아이 웃는 소리 / 오래된 나무 / 좋은 문장 한 줄",
+    after:"그 장면을 10초만 다시 떠올려 보세요. 기억은 되새길 때 깊어집니다." },
+
+  { id:"calm", icon:"🧘", name:"긴장 알아차리기",
+    desc:"하루 중 한 번, 몸의 힘을 빼기",
+    why:"몸이 먼저 굳고 마음이 따라옵니다. 어깨·턱·손의 <b>긴장을 알아차리고 푸는 것</b>만으로 뇌에 들어가는 위험 신호가 줄어듭니다. 알아차림 자체가 전전두피질의 일입니다.",
+    type:"check",
+    after:"어깨를 귀까지 올렸다가 '후—' 하고 떨어뜨립니다. 턱의 힘을 빼고, 주먹을 폅니다. 3번 반복." }
+];
+
+var PATTERNS = [
+  { id:"46",  name:"4-6 진정",  seq:[[4,"들이쉬기"],[6,"내쉬기"]], hint:"편도체 안정 · 기본" },
+  { id:"478", name:"4-7-8 이완", seq:[[4,"들이쉬기"],[7,"멈추기"],[8,"내쉬기"]], hint:"깊은 이완 · 수면" },
+  { id:"box", name:"4-4-4-4 박스", seq:[[4,"들이쉬기"],[4,"멈추기"],[4,"내쉬기"],[4,"멈추기"]], hint:"집중력 · 전전두피질" },
+  { id:"55",  name:"5-5 코히런스", seq:[[5,"들이쉬기"],[5,"내쉬기"]], hint:"심박 일관성 · 안정" }
+];
+var MINUTES = [1,3,5,10,15];
+
+var PHASE_TIP = {
+  "들이쉬기":"코로 천천히, 배가 부풀도록",
+  "내쉬기":"입으로 가늘고 길게, 어깨를 떨어뜨리며",
+  "멈추기":"힘을 주지 말고 그대로 머물기"
+};
+
+/* ========== 저장소 ========== */
+var S = load();
+function today(){ var d=new Date(); return d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate()); }
+function p2(n){ return n<10?"0"+n:""+n; }
+function load(){
+  var base = { days:{}, journal:[], totalMed:0, totalMantra:0, best:0, pattern:"46", minutes:5 };
+  try{
+    var raw = localStorage.getItem(KEY);
+    if(!raw) return base;
+    var o = JSON.parse(raw);
+    for(var k in base) if(!(k in o)) o[k]=base[k];
+    return o;
+  }catch(e){ return base; }
+}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+function day(d){
+  d = d || today();
+  if(!S.days[d]) S.days[d] = { tasks:{}, mantra:0, med:0 };
+  return S.days[d];
+}
+
+/* ========== 유틸 ========== */
+function $(s){ return document.querySelector(s); }
+function $$(s){ return Array.prototype.slice.call(document.querySelectorAll(s)); }
+var toastT;
+function toast(msg){
+  var t=$("#toast"); t.textContent=msg; t.classList.add("on");
+  clearTimeout(toastT); toastT=setTimeout(function(){ t.classList.remove("on"); },1900);
+}
+function buzz(ms){ try{ if(navigator.vibrate) navigator.vibrate(ms||18); }catch(e){} }
+
+/* 싱잉볼 톤 */
+var AC=null;
+function bowl(freq, dur){
+  try{
+    if(!AC) AC = new (window.AudioContext||window.webkitAudioContext)();
+    if(AC.state==="suspended") AC.resume();
+    var t=AC.currentTime, g=AC.createGain();
+    g.gain.setValueAtTime(0,t);
+    g.gain.linearRampToValueAtTime(.22,t+.04);
+    g.gain.exponentialRampToValueAtTime(.0001,t+(dur||3.2));
+    g.connect(AC.destination);
+    [1,2.01,2.98].forEach(function(m,i){
+      var o=AC.createOscillator(), gg=AC.createGain();
+      o.type="sine"; o.frequency.value=(freq||288)*m;
+      gg.gain.value=[1,.34,.16][i];
+      o.connect(gg); gg.connect(g); o.start(t); o.stop(t+(dur||3.2)+.1);
+    });
+  }catch(e){}
+}
+
+/* ========== 스트릭 ========== */
+function doneCount(d){
+  var t=day(d).tasks, n=0;
+  HABITS.forEach(function(h){ if(t[h.id]) n++; });
+  return n;
+}
+function dateStr(off){
+  var d=new Date(); d.setDate(d.getDate()+off);
+  return d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate());
+}
+function streak(){
+  var n=0, i=0;
+  if(!(S.days[today()] && doneCount(today())>0)) i=-1;   // 오늘 아직이면 어제부터
+  for(;;i--){
+    var k=dateStr(i);
+    if(S.days[k] && doneCount(k)>0){ n++; } else break;
+    if(n>2000) break;
+  }
+  return n;
+}
+
+/* ========== 렌더 ========== */
+var TITLES = { today:["오늘","전전두피질 켜기 · 편도체 가라앉히기"],
+               med:["명상","날숨을 길게 — 안전 신호 보내기"],
+               log:["기록","내가 놓아준 것 · 감탄한 것"],
+               stat:["성장","끊기지 않은 선이 근육이 된다"] };
+
+function renderAll(){ renderToday(); renderStats(); renderStreak(); }
+
+function renderStreak(){
+  var n=streak();
+  if(n>S.best){ S.best=n; save(); }
+  $("#streakN").textContent=n;
+}
+
+function renderToday(){
+  var d=day(), n=doneCount(), pct=Math.round(n/HABITS.length*100);
+  $("#pText").textContent=n+"/"+HABITS.length;
+  $("#pPct").textContent=pct+"%";
+  $("#pFill").style.width=pct+"%";
+  $("#mCount").textContent=d.mantra;
+
+  var box=$("#habitList"); box.innerHTML="";
+  HABITS.forEach(function(h){
+    var on=!!d.tasks[h.id];
+    var b=document.createElement("button");
+    b.className="habit"+(on?" done":"");
+    b.innerHTML='<span class="ico">'+h.icon+'</span>'+
+      '<span class="tx"><b></b><span></span></span>'+
+      '<span class="chk">✓</span>';
+    b.querySelector("b").textContent=h.name;
+    b.querySelector(".tx span").textContent=h.desc;
+    b.onclick=function(){ openHabit(h); };
+    box.appendChild(b);
+  });
+}
+
+function renderStats(){
+  $("#sStreak").textContent=streak();
+  $("#sBest").textContent=S.best;
+  $("#sMed").textContent=Math.round(S.totalMed/60)+"분";
+  $("#sMan").textContent=S.totalMantra;
+
+  var bars=$("#bars"); bars.innerHTML="";
+  var max=1;
+  for(var i=-6;i<=0;i++) max=Math.max(max, S.days[dateStr(i)]?doneCount(dateStr(i)):0);
+  var W=["일","월","화","수","목","금","토"];
+  for(var j=-6;j<=0;j++){
+    var k=dateStr(j), v=S.days[k]?doneCount(k):0;
+    var dt=new Date(); dt.setDate(dt.getDate()+j);
+    var cell=document.createElement("div");
+    var h=Math.max(4, Math.round(v/max*100));
+    cell.innerHTML='<i class="'+(v>0?"f":"")+'" style="height:'+h+'%"></i><em>'+
+      (j===0?"오늘":W[dt.getDay()])+'</em>';
+    bars.appendChild(cell);
+  }
+}
+
+/* ========== 탭 ========== */
+$$("nav button").forEach(function(b){
+  b.onclick=function(){
+    var v=b.dataset.v;
+    $$("nav button").forEach(function(x){ x.classList.toggle("on", x===b); });
+    ["today","med","log","stat"].forEach(function(k){ $("#v-"+k).classList.toggle("hide", k!==v); });
+    $("#hTitle").textContent=TITLES[v][0];
+    $("#hSub").textContent=TITLES[v][1];
+    if(v==="log") renderLog();
+    if(v==="stat") renderStats();
+    window.scrollTo(0,0);
+  };
+});
+
+/* ========== 시트 ========== */
+var sheetSave=null;
+function openSheet(title, sub, why, build){
+  $("#shH").textContent=title;
+  $("#shS").textContent=sub||"";
+  $("#shWhy").innerHTML=why||"";
+  $("#shWhy").classList.toggle("hide", !why);
+  var body=$("#shBody"); body.innerHTML=""; build(body);
+  $("#sheet").classList.add("on");
+}
+function closeSheet(){ $("#sheet").classList.remove("on"); sheetSave=null; }
+$$("[data-close]").forEach(function(e){ e.onclick=closeSheet; });
+
+function openHabit(h){
+  if(h.type==="link"){
+    openSheet(h.name, h.desc, h.why, function(b){
+      var go=document.createElement("button");
+      go.className="btn";
+      go.textContent = h.id==="mantra" ? "지금 낭송하기" : "지금 명상하기";
+      go.onclick=function(){
+        closeSheet();
+        if(h.id==="mantra") startFocus();
+        else $$("nav button")[1].click();
+      };
+      b.appendChild(go);
+      b.appendChild(mkToggle(h));
+    });
+    return;
+  }
+  if(h.type==="check"){
+    openSheet(h.name, h.desc, h.why, function(b){
+      var p=document.createElement("div");
+      p.className="why"; p.style.background="transparent"; p.style.borderStyle="dashed";
+      p.textContent=h.after; b.appendChild(p);
+      b.appendChild(mkToggle(h));
+    });
+    return;
+  }
+  /* journal */
+  openSheet(h.name, h.desc, h.why, function(b){
+    var q=document.createElement("div"); q.className="prompt"; q.textContent=h.prompt; b.appendChild(q);
+    var ta=document.createElement("textarea"); ta.rows=4; ta.placeholder=h.ph; b.appendChild(ta);
+    var af=document.createElement("div");
+    af.className="why hide"; af.style.marginTop="12px"; af.textContent=h.after; b.appendChild(af);
+    var btn=document.createElement("button");
+    btn.className="btn"; btn.style.marginTop="12px"; btn.textContent="적고 완료하기";
+    btn.onclick=function(){
+      var v=ta.value.trim();
+      if(!v){ ta.focus(); toast("한 줄이면 충분합니다"); return; }
+      S.journal.unshift({ id:Date.now(), tag:h.tag, text:v, ts:Date.now() });
+      day().tasks[h.id]=true; save(); renderAll(); buzz();
+      af.classList.remove("hide");
+      btn.textContent="저장됨 ✓"; btn.disabled=true; btn.style.opacity=".6";
+      ta.disabled=true;
+      setTimeout(closeSheet, 1500);
+      toast("기록했습니다");
+    };
+    b.appendChild(btn);
+    setTimeout(function(){ ta.focus(); },260);
+  });
+}
+
+function mkToggle(h){
+  var t=day().tasks[h.id];
+  var btn=document.createElement("button");
+  btn.className="btn ghost"; btn.style.marginTop="10px";
+  btn.textContent = t ? "오늘 완료 취소" : "완료로 표시";
+  btn.onclick=function(){
+    day().tasks[h.id]=!day().tasks[h.id];
+    save(); renderAll(); buzz(); closeSheet();
+    toast(day().tasks[h.id]?"오늘 "+h.name+" 완료 ✓":"완료를 취소했습니다");
+  };
+  return btn;
+}
+
+/* ========== 만트라 ========== */
+var mIdx=0, mTimer=null, mReps=0;
+function cycleCard(){
+  var lines=$$("#mantraCard .line");
+  lines.forEach(function(l,i){ l.classList.toggle("on", i===mIdx); });
+  mIdx=(mIdx+1)%3;
+}
+cycleCard(); setInterval(cycleCard, 2600);
+
+function startFocus(){
+  $("#focus").classList.add("on");
+  mReps=0; var i=0;
+  var lines=$$("#focus .l");
+  $("#fCnt").textContent="0 / "+MANTRA_GOAL;
+  bowl(288,2.4);
+  step();
+  function step(){
+    lines.forEach(function(l,k){ l.classList.toggle("on", k===i); });
+    if(i===0) buzz(12);
+    i++;
+    if(i>=3){
+      i=0; mReps++;
+      day().mantra++; S.totalMantra++;
+      if(day().mantra>=MANTRA_GOAL) day().tasks.mantra=true;
+      save(); renderAll();
+      $("#fCnt").textContent=Math.min(mReps,MANTRA_GOAL)+" / "+MANTRA_GOAL;
+      if(mReps>=MANTRA_GOAL){
+        bowl(288,3.4); buzz([20,60,20]);
+        setTimeout(function(){ stopFocus(); toast("만트라 21회 완료 ✓"); }, 1400);
+        return;
+      }
+    }
+    mTimer=setTimeout(step, 2400);
+  }
+}
+function stopFocus(){
+  clearTimeout(mTimer); mTimer=null;
+  $("#focus").classList.remove("on");
+  renderAll();
+}
+$("#fClose").onclick=function(){ stopFocus(); };
+$("#goMantra").onclick=startFocus;
+$("#mantraCard").onclick=startFocus;
+
+/* ========== 명상 ========== */
+var med={ on:false, t:null, tick:null, endAt:0, si:0 };
+
+function pat(){ for(var i=0;i<PATTERNS.length;i++) if(PATTERNS[i].id===S.pattern) return PATTERNS[i]; return PATTERNS[0]; }
+
+function renderChips(){
+  var pc=$("#patChips"); pc.innerHTML="";
+  PATTERNS.forEach(function(p){
+    var b=document.createElement("button");
+    b.className="chip"+(p.id===S.pattern?" on":"");
+    b.textContent=p.name;
+    b.onclick=function(){ if(med.on) return; S.pattern=p.id; save(); renderChips(); };
+    pc.appendChild(b);
+  });
+  $("#patHint").textContent=pat().hint;
+  var mc=$("#minChips"); mc.innerHTML="";
+  MINUTES.forEach(function(m){
+    var b=document.createElement("button");
+    b.className="chip"+(m===S.minutes?" on":"");
+    b.textContent=m+"분";
+    b.onclick=function(){ if(med.on) return; S.minutes=m; save(); renderChips(); };
+    mc.appendChild(b);
+  });
+}
+renderChips();
+
+function setBall(scale, sec){
+  var b=$("#ball");
+  b.style.setProperty("--bt", sec+"s");
+  b.style.transform="scale("+scale+")";
+}
+function medPhase(){
+  if(!med.on) return;
+  var seq=pat().seq, s=seq[med.si % seq.length];
+  var secs=s[0], nm=s[1];
+  $("#phName").textContent=nm;
+  $("#phTip").textContent=PHASE_TIP[nm]||"";
+  if(nm==="들이쉬기") setBall(2.05, secs);
+  else if(nm==="내쉬기") setBall(1, secs);
+  buzz(nm==="내쉬기"?24:12);
+  med.si++;
+  med.t=setTimeout(medPhase, secs*1000);
+}
+function medStart(){
+  med.on=true; med.si=0;
+  med.endAt=Date.now()+S.minutes*60000;
+  $("#medBtn").classList.add("hide");
+  $("#medStop").classList.remove("hide");
+  $("#orb").classList.remove("calm");
+  bowl(288,3.2);
+  medPhase();
+  med.tick=setInterval(function(){
+    var left=Math.max(0, Math.round((med.endAt-Date.now())/1000));
+    $("#clock").textContent=p2(Math.floor(left/60))+":"+p2(left%60);
+    if(left<=0) medEnd(true);
+  },250);
+  $("#clock").textContent=p2(S.minutes)+":00";
+}
+function medEnd(complete){
+  if(!med.on) return;
+  var elapsed = S.minutes*60 - Math.max(0, Math.round((med.endAt-Date.now())/1000));
+  med.on=false; clearTimeout(med.t); clearInterval(med.tick);
+  $("#medBtn").classList.remove("hide");
+  $("#medStop").classList.add("hide");
+  $("#orb").classList.add("calm");
+  setBall(1,1.2);
+  $("#phName").textContent = complete?"완료":"준비";
+  $("#phTip").textContent = complete?"이 느낌을 잠시 그대로 두세요":"편안히 앉아 어깨의 힘을 뺍니다";
+  $("#clock").textContent="00:00";
+  if(elapsed>20){
+    day().med += elapsed; S.totalMed += elapsed;
+    if(day().med>=180) day().tasks.breath=true;
+    save(); renderAll();
+  }
+  if(complete){ bowl(288,4.2); buzz([30,80,30]); toast("명상 "+S.minutes+"분 완료 ✓"); }
+  else if(elapsed>20) toast(Math.round(elapsed/60*10)/10+"분 기록됨");
+}
+$("#medBtn").onclick=medStart;
+$("#medStop").onclick=function(){ medEnd(false); };
+
+/* ========== 기록 ========== */
+var TAGS={ awe:["감탄","awe"], letgo:["놓아줌","letgo"], kind:["자기존중","kind"], being:["Being","being"] };
+var logF="all";
+function renderLogFilter(){
+  var f=$("#logFilter"); f.innerHTML="";
+  var opts=[["all","전체"]].concat(Object.keys(TAGS).map(function(k){ return [k,TAGS[k][0]]; }));
+  opts.forEach(function(o){
+    var b=document.createElement("button");
+    b.className="chip"+(o[0]===logF?" on":"");
+    b.textContent=o[1];
+    b.onclick=function(){ logF=o[0]; renderLog(); };
+    f.appendChild(b);
+  });
+}
+function renderLog(){
+  renderLogFilter();
+  var list=$("#logList"); list.innerHTML="";
+  var items=S.journal.filter(function(e){ return logF==="all"||e.tag===logF; });
+  if(!items.length){
+    list.innerHTML='<div class="empty">아직 기록이 없습니다.<br>오늘의 훈련에서 한 줄만 적어보세요.</div>';
+    return;
+  }
+  items.forEach(function(e){
+    var d=new Date(e.ts);
+    var el=document.createElement("div"); el.className="entry";
+    el.innerHTML='<div class="top"><span class="tag '+e.tag+'"></span><span class="date"></span></div>'+
+                 '<p></p><button class="del">삭제</button>';
+    el.querySelector(".tag").textContent=(TAGS[e.tag]||["기록"])[0];
+    el.querySelector(".date").textContent=(d.getMonth()+1)+"월 "+d.getDate()+"일 "+p2(d.getHours())+":"+p2(d.getMinutes());
+    el.querySelector("p").textContent=e.text;
+    el.querySelector(".del").onclick=function(){
+      S.journal=S.journal.filter(function(x){ return x.id!==e.id; });
+      save(); renderLog();
+    };
+    list.appendChild(el);
+  });
+}
+
+/* ========== 데이터 ========== */
+$("#expBtn").onclick=function(){
+  var blob=new Blob([JSON.stringify(S,null,2)],{type:"application/json"});
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="maum-muscle-"+today()+".json";
+  document.body.appendChild(a); a.click(); a.remove();
+  toast("내보냈습니다");
+};
+$("#resetBtn").onclick=function(){
+  if(!confirm("모든 기록과 훈련 이력을 지웁니다. 계속할까요?")) return;
+  S={ days:{}, journal:[], totalMed:0, totalMantra:0, best:0, pattern:"46", minutes:5 };
+  save(); renderAll(); renderLog(); renderChips(); toast("초기화했습니다");
+};
+
+/* ========== 시작 ========== */
+day(); save();
+renderAll(); renderLogFilter();
+
+document.addEventListener("visibilitychange", function(){
+  if(document.hidden && med.on) medEnd(false);
+});
+if("serviceWorker" in navigator){
+  window.addEventListener("load", function(){
+    navigator.serviceWorker.register("sw.js").catch(function(){});
+  });
+}
+})();
+</script>
+</body>
+</html>
