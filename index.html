@@ -261,6 +261,53 @@ nav button.on{color:var(--acc)}
 .sosend h3{font-size:21px;font-weight:800;letter-spacing:-.02em;margin-bottom:8px}
 .sosend p{font-size:14px;color:var(--dim);line-height:1.7;margin-bottom:20px}
 .sosend .btn{margin-bottom:9px}
+/* ---------- Being 세션 ---------- */
+.being{position:fixed;inset:0;z-index:82;background:#07090b;display:none;
+  flex-direction:column;align-items:center;justify-content:center;padding:24px 20px}
+.being.on{display:flex}
+.being .x{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:16px;
+  width:40px;height:40px;border-radius:50%;background:#161c23;color:var(--dim);font-size:19px;z-index:2}
+.being .sosbar i{background:linear-gradient(90deg,#2f8f63,#5ad19a)}
+.being .sostop b{color:var(--ok)}
+.bewrap{width:100%;max-width:430px}
+.beq{font-size:clamp(20px,5.8vw,25px);font-weight:800;letter-spacing:-.025em;line-height:1.4;
+  text-wrap:balance;margin-bottom:8px}
+.behint{font-size:13px;color:var(--dim);line-height:1.65;margin-bottom:16px}
+.beex{display:block;width:100%;text-align:left;font-size:13.5px;color:var(--ok);
+  background:rgba(90,209,154,.07);border:1px dashed rgba(90,209,154,.32);
+  border-radius:13px;padding:11px 13px;margin-bottom:12px;line-height:1.5}
+.beex b{display:block;font-size:10.5px;letter-spacing:.1em;color:var(--dim2);
+  font-weight:800;margin-bottom:3px}
+.being textarea{font-size:16px;min-height:96px}
+.being .btn{margin-top:12px}
+
+/* 상상 단계 */
+.beorb{width:min(52vw,190px);aspect-ratio:1;margin:0 auto 26px;display:grid;place-items:center;position:relative}
+.beorb .r{position:absolute;inset:0;border-radius:50%;border:1px solid #212a34}
+.beorb .b{width:40%;aspect-ratio:1;border-radius:50%;
+  background:radial-gradient(circle at 34% 30%,#d8ffe8,#5ad19a 44%,#1d7550 100%);
+  box-shadow:0 0 56px rgba(90,209,154,.26),0 0 130px rgba(90,209,154,.10);
+  animation:bepulse 9s ease-in-out infinite}
+@keyframes bepulse{0%,100%{transform:scale(1)}50%{transform:scale(1.72)}}
+@media (prefers-reduced-motion:reduce){ .beorb .b{animation:none;transform:scale(1.3)} }
+.beline{text-align:center;font-size:clamp(18px,5.2vw,23px);font-weight:700;line-height:1.55;
+  letter-spacing:-.02em;min-height:3.2em;text-wrap:balance;
+  opacity:0;transition:opacity .9s;padding:0 4px}
+.beline.on{opacity:1}
+.beline em{font-style:normal;color:var(--ok)}
+.beskip{display:block;margin:20px auto 0;font-size:12.5px;color:var(--dim2);
+  border:1px solid var(--line);border-radius:99px;padding:9px 18px}
+
+/* 마무리 카드 */
+.bedone{text-align:center}
+.bedone .ic{font-size:38px;margin-bottom:10px}
+.bedone h3{font-size:20px;font-weight:800;letter-spacing:-.02em;margin-bottom:14px}
+.bedone .quote{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:15px;text-align:left;margin-bottom:10px}
+.bedone .quote b{display:block;font-size:10.5px;letter-spacing:.1em;color:var(--dim2);
+  font-weight:800;margin-bottom:5px}
+.bedone .quote p{font-size:15px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
+.bedone .quote.fut p{color:var(--ok);font-weight:700}
 .hide{display:none!important}
 .muted{color:var(--dim);font-size:13px}
 .empty{text-align:center;color:var(--dim2);font-size:13px;padding:30px 10px}
@@ -570,6 +617,14 @@ nav button.on{color:var(--acc)}
   </div>
 </div>
 
+<!-- Being 세션 -->
+<div class="being" id="being" role="dialog" aria-label="Being 먼저 세션">
+  <div class="sosbar"><i id="beBar"></i></div>
+  <button class="x" id="beX" aria-label="닫기">✕</button>
+  <div class="sostop"><b id="beStep"></b><span id="beSub"></span></div>
+  <div class="bewrap" id="beBody"></div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -602,12 +657,9 @@ var HABITS = [
     after:"적었으면 숨을 길게 내쉬며 말해보세요 — “이건 내가 어쩔 수 없는 부분이야. 여기까지.”" },
 
   { id:"being", icon:"🌱", name:"Being 먼저",
-    desc:"무엇을 할까(Doing)보다 어떤 사람으로 있을까",
-    why:"Having → Doing 순서로 살면 뇌는 늘 결핍과 성과에 반응합니다. <b>Being을 먼저</b> 정하면 기준이 내 안으로 들어오고, 외부 평가에 흔들리는 편도체 반응이 줄어듭니다.",
-    type:"journal", tag:"being",
-    prompt:"오늘 나는 어떤 사람으로 존재하고 싶은가?",
-    ph:"예) 서두르지 않는 사람 / 먼저 웃는 사람 / 끝까지 듣는 사람",
-    after:"오늘 하루, 선택이 어려울 때마다 이 문장으로 돌아오세요." },
+    desc:"오늘의 나, 그리고 이미 이룬 나로 살아보기",
+    why:"Having → Doing 순서로 살면 뇌는 늘 결핍과 성과에 반응합니다. <b>Being을 먼저</b> 정하면 기준이 내 안으로 들어오고, 외부 평가에 흔들리는 편도체 반응이 줄어듭니다.<br><br>원하는 결과를 <b>기분 좋게 상상만</b> 하면 뇌가 이미 이룬 것으로 착각해 오히려 실행력이 떨어진다는 연구가 있습니다. 그래서 이 세션은 원하는 미래를 <b>생생하게 그린 다음, 반드시 걸림돌까지</b> 함께 봅니다. 그 둘을 붙여야 상상이 힘이 됩니다.",
+    type:"being", tag:"being" },
 
   { id:"kind", icon:"💛", name:"나를 존중하기",
     desc:"Be your best friend — 나에게 베프처럼 한마디",
@@ -652,7 +704,8 @@ function today(){ var d=new Date(); return d.getFullYear()+"-"+p2(d.getMonth()+1
 function p2(n){ return n<10?"0"+n:""+n; }
 function load(){
   var base = { days:{}, journal:[], totalMed:0, totalMantra:0, best:0, sos:0,
-               pattern:"46", minutes:5, snd:"none", voice:false, xp:0, perfect:0, badges:{},
+               pattern:"46", minutes:5, snd:"none", voice:false, futureSelf:"",
+               xp:0, perfect:0, badges:{},
                freeze:{ count:1, lastGrant:null, used:{} } };
   try{
     var raw = localStorage.getItem(KEY);
@@ -762,7 +815,8 @@ function renderToday(){
       '<span class="tx"><b></b><span></span></span>'+
       '<span class="chk">✓</span>';
     b.querySelector("b").textContent=h.name;
-    b.querySelector(".tx span").textContent=h.desc;
+    b.querySelector(".tx span").textContent =
+      (h.id==="being" && S.futureSelf) ? "3개월 뒤 — "+S.futureSelf : h.desc;
     b.onclick=function(){ openHabit(h); };
     box.appendChild(b);
   });
@@ -829,6 +883,16 @@ function openHabit(h){
         if(h.id==="mantra") startFocus();
         else $$("nav button")[1].click();
       };
+      b.appendChild(go);
+      b.appendChild(mkToggle(h));
+    });
+    return;
+  }
+  if(h.type==="being"){
+    openSheet(h.name, h.desc, h.why, function(b){
+      var go=document.createElement("button");
+      go.className="btn"; go.textContent="세션 시작 (약 3분)";
+      go.onclick=function(){ closeSheet(); beOpen(); };
       b.appendChild(go);
       b.appendChild(mkToggle(h));
     });
@@ -931,6 +995,255 @@ function stopFocus(){
 $("#fClose").onclick=function(){ stopFocus(); };
 $("#goMantra").onclick=startFocus;
 $("#mantraCard").onclick=startFocus;
+
+/* ================= Being 먼저 — 확장 세션 ================= */
+/* 원하는 미래를 기분 좋게 상상만 하면 뇌가 이미 이룬 것으로 착각해 오히려
+   실행력이 떨어진다(positive fantasy). 그래서 순서를 이렇게 둔다.
+     오늘의 나 → 미래의 나 → 그 장면 안으로(감각) → 걸림돌 → 그때의 나(if-then)
+   3단계에서 감정적 끌림을 만들고, 4·5단계가 그것을 실행으로 묶는다.
+   둘 중 하나만 하면 효과가 없거나 역효과다. */
+
+/* 예시는 날짜로 고른다 — 하루 안에서는 고정, 매일 새로 바뀐다 */
+/* 날짜를 해시해서 무작위로 고르면 이틀 연속 같은 예시가 나온다(생일 문제).
+   대신 날짜 번호로 목록을 한 칸씩 걸어간다 — 목록을 다 쓸 때까지 절대 겹치지 않는다. */
+function daily(arr, key){
+  var off = 0;
+  for(var i=0;i<key.length;i++) off = (off*31 + key.charCodeAt(i)) | 0;
+  var n = (dnum(today()) + Math.abs(off)) % arr.length;
+  return arr[(n + arr.length) % arr.length];
+}
+
+var EX_TODAY = [
+  "서두르지 않는 사람","먼저 웃는 사람","끝까지 듣는 사람","작은 것에 감탄하는 사람",
+  "화가 나도 한 박자 쉬는 사람","나에게 너그러운 사람","약속을 지키는 사람",
+  "모르는 걸 모른다고 말하는 사람","남의 속도를 인정하는 사람","오늘 할 일만 보는 사람",
+  "고맙다고 먼저 말하는 사람","결과보다 과정을 보는 사람","조용히 꾸준한 사람",
+  "누가 뭐래도 내 편이 되어주는 사람","눈을 보고 말하는 사람","져줘도 괜찮은 사람"
+];
+var EX_FUTURE = [
+  "아침이 두렵지 않은 사람","거절할 줄 아는 사람","매일 30분은 나를 위해 쓰는 사람",
+  "몸이 가벼워진 사람","하고 싶던 일을 이미 시작한 사람","사람들 앞에서 편안한 사람",
+  "잠들기 전에 후회가 없는 사람","화를 내지 않고도 뜻을 전하는 사람","미루지 않는 사람",
+  "늘 배우고 있는 것이 하나 있는 사람","혼자 있어도 괜찮은 사람","돈 이야기를 담담하게 하는 사람",
+  "부탁을 편하게 하는 사람","숨을 깊게 쉬고 있는 사람"
+];
+var EX_BLOCK = [
+  "저녁이 되면 지쳐서 아무것도 하기 싫어진다","남들 시선이 자꾸 신경 쓰인다",
+  "며칠 하다 하루 빠지면 그냥 놓아버린다","완벽하게 못 할 바엔 아예 안 하려 한다",
+  "바쁘다는 말로 미룬다","시작하기 전에 생각이 너무 많아진다",
+  "누가 한마디 하면 무너진다","휴대폰을 잡으면 시간이 사라진다",
+  "잘 되다가도 스스로 의심한다","몸이 피곤하면 다 포기하고 싶어진다",
+  "혼자 하면 금방 흐지부지된다","기분이 나쁘면 그날 하루를 통째로 버린다"
+];
+var EX_PLAN = [
+  "저녁에 지치면, 나는 딱 5분만 하고 자겠다",
+  "남의 시선이 신경 쓰이면, 나는 만트라를 세 번 외우겠다",
+  "하루 빠지면, 나는 자책 대신 다음 날 그냥 다시 시작하겠다",
+  "생각이 많아지면, 나는 생각을 멈추고 첫 줄만 쓰겠다",
+  "휴대폰을 집으면, 나는 화면을 끄고 숨을 세 번 쉬겠다",
+  "누가 한마디 하면, 나는 그 자리에서 답하지 않고 하루를 두겠다",
+  "몸이 피곤하면, 나는 목표를 절반으로 줄여서라도 하겠다",
+  "의심이 들면, 나는 지금까지 해온 날짜를 세어보겠다"
+];
+
+var be = { on:false, step:0, t:[], data:{ today:"", future:"", block:"", plan:"" } };
+
+function beClear(){ be.t.forEach(clearTimeout); be.t = []; }
+function beWait(fn, ms){ be.t.push(setTimeout(fn, ms)); }
+
+function beOpen(){
+  if(be.on) return;
+  be.on = true;
+  be.data = { today:"", future:"", block:"", plan:"" };
+  $("#being").classList.add("on");
+  beGo(1);
+}
+function beClose(){
+  beClear(); hush();
+  be.on = false;
+  $("#being").classList.remove("on");
+  $("#beBar").style.width = "0%";
+  renderAll();
+  collectRewards();
+}
+
+function beProgress(n){ $("#beBar").style.width = Math.round(n/6*100)+"%"; }
+
+/* 글로 답하는 단계는 모양이 같으므로 하나로 만든다 */
+function beInput(o){
+  var body = $("#beBody"); body.innerHTML = "";
+  var q = document.createElement("div"); q.className = "beq"; q.textContent = o.q;
+  var h = document.createElement("div"); h.className = "behint"; h.innerHTML = o.hint;
+  var ex = document.createElement("button"); ex.className = "beex";
+  ex.innerHTML = '<b>오늘의 예시 · 눌러서 넣기</b>';
+  ex.appendChild(document.createTextNode(o.ex));
+  var ta = document.createElement("textarea"); ta.rows = 3; ta.placeholder = o.ph;
+  ta.value = o.value || "";
+  ex.onclick = function(){ ta.value = o.ex; ta.focus(); buzz(10); };
+  var btn = document.createElement("button"); btn.className = "btn"; btn.textContent = o.btn || "다음";
+  btn.onclick = function(){
+    var v = ta.value.trim();
+    if(!v){ ta.focus(); toast("한 줄이면 충분합니다"); return; }
+    o.done(v);
+  };
+  body.appendChild(q); body.appendChild(h); body.appendChild(ex);
+  body.appendChild(ta); body.appendChild(btn);
+  beWait(function(){ try{ ta.focus(); }catch(e){} }, 300);
+}
+
+function beGo(n){
+  beClear();
+  be.step = n;
+  beProgress(n);
+
+  if(n === 1){
+    $("#beStep").textContent = "1 / 5 · 오늘의 나";
+    $("#beSub").textContent = "지금 여기, 오늘 하루";
+    beInput({
+      q:"오늘 나는 어떤 사람으로 있고 싶은가?",
+      hint:"무엇을 <b>할지</b>가 아니라 어떤 사람으로 <b>있을지</b>를 정합니다. 오늘 선택이 어려울 때마다 돌아올 문장입니다.",
+      ex: daily(EX_TODAY, "today"),
+      ph:"○○한 사람",
+      value: be.data.today,
+      done:function(v){ be.data.today = v; beGo(2); }
+    });
+  }
+  else if(n === 2){
+    $("#beStep").textContent = "2 / 5 · 미래의 나";
+    $("#beSub").textContent = "3개월 뒤";
+    beInput({
+      q:"3개월 뒤, 나는 어떤 사람이 되어 있는가?",
+      hint:"'되고 싶다'가 아니라 <b>'되어 있다'</b>로 씁니다. 뇌는 이미 이루어진 문장에 다르게 반응합니다.",
+      ex: daily(EX_FUTURE, "future"),
+      ph:"3개월 뒤 나는 ○○한 사람이다",
+      value: be.data.future,
+      done:function(v){ be.data.future = v; beScene(); }
+    });
+  }
+  else if(n === 4){
+    $("#beStep").textContent = "4 / 5 · 걸림돌";
+    $("#beSub").textContent = "가장 중요한 단계";
+    beInput({
+      q:"그런데, 나를 막는 건 무엇인가?",
+      hint:"여기가 핵심입니다. 좋은 장면만 그리고 끝내면 뇌가 이미 이룬 걸로 착각해 <b>오히려 덜 움직입니다.</b> 걸림돌을 같이 봐야 상상이 힘이 됩니다.",
+      ex: daily(EX_BLOCK, "block"),
+      ph:"내 안에 있는 것 하나만",
+      value: be.data.block,
+      done:function(v){ be.data.block = v; beGo(5); }
+    });
+  }
+  else if(n === 5){
+    $("#beStep").textContent = "5 / 5 · 그때의 나";
+    $("#beSub").textContent = "미리 정해두기";
+    beInput({
+      q:"그게 왔을 때, 나는 무엇을 하겠는가?",
+      hint:"「○○하면, 나는 ○○하겠다」 형식으로 씁니다. 이렇게 <b>미리 정해두면</b> 그 순간에 판단하지 않아도 몸이 먼저 움직입니다.",
+      ex: daily(EX_PLAN, "plan"),
+      ph:"○○하면, 나는 ○○하겠다",
+      value: be.data.plan,
+      btn:"마치기",
+      done:function(v){ be.data.plan = v; beFinish(); }
+    });
+  }
+}
+
+/* 3단계 — 그 장면 안으로 */
+function beScene(){
+  beClear();
+  be.step = 3;
+  beProgress(3);
+  $("#beStep").textContent = "3 / 5 · 그 장면 안으로";
+  $("#beSub").textContent = (S.voice && TTS.ok)
+    ? "읽어드립니다 · 눈을 감아도 됩니다"
+    : "천천히 읽으며 그려보세요";
+
+  var f = be.data.future;
+  var LINES = [
+    "눈을 감고,<br>3개월 뒤 그날 아침으로 갑니다.",
+    "당신은 지금<br><em>어디에</em> 있나요?",
+    "무엇이 보이나요?<br>빛은 어떤가요?",
+    "무슨 소리가<br>들리나요?",
+    "몸은 어떤 느낌인가요?<br>어깨는, 호흡은?",
+    "그 사람의 얼굴을 봅니다.<br>지금 <em>어떤 표정</em>인가요?",
+    "「나는 <em>"+esc(f)+"</em>다」<br>속으로 세 번 말해보세요.",
+    "그 느낌을 기억하세요.<br>이제 천천히 돌아옵니다."
+  ];
+  var SAY = [
+    "눈을 감고, 3개월 뒤 그날 아침으로 갑니다.",
+    "당신은 지금 어디에 있나요?",
+    "무엇이 보이나요? 빛은 어떤가요?",
+    "무슨 소리가 들리나요?",
+    "몸은 어떤 느낌인가요? 어깨는, 호흡은?",
+    "그 사람의 얼굴을 봅니다. 지금 어떤 표정인가요?",
+    "나는 "+f+"다. 속으로 세 번 말해보세요.",
+    "그 느낌을 기억하세요. 이제 천천히 돌아옵니다."
+  ];
+
+  var body = $("#beBody");
+  body.innerHTML =
+    '<div class="beorb"><div class="r"></div><div class="b"></div></div>' +
+    '<div class="beline" id="beLine"></div>' +
+    '<button class="beskip" id="beSkip">건너뛰고 계속</button>';
+  $("#beSkip").onclick = function(){ hush(); beGo(4); };
+
+  bowl(324, 3.0);
+  var el = $("#beLine"), i = 0;
+  var HOLD = 8000;
+
+  (function step(){
+    if(!be.on || be.step !== 3) return;
+    el.classList.remove("on");
+    beWait(function(){
+      if(!be.on || be.step !== 3) return;
+      el.innerHTML = LINES[i];
+      el.classList.add("on");
+      hush(); say(SAY[i], 0.80);
+      buzz(10);
+      i++;
+      if(i >= LINES.length){
+        beWait(function(){ if(be.on && be.step===3) beGo(4); }, HOLD);
+        return;
+      }
+      beWait(step, HOLD);
+    }, 900);
+  })();
+}
+
+function esc(s){
+  return String(s).replace(/[&<>"]/g, function(c){
+    return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c];
+  });
+}
+
+function beFinish(){
+  beClear(); hush();
+  be.step = 6;
+  beProgress(6);
+  $("#beStep").textContent = "완료";
+  $("#beSub").textContent = "";
+
+  var d = be.data;
+  S.futureSelf = d.future;
+  S.journal.unshift({ id:Date.now(), tag:"being",
+    text:"오늘의 나 — "+d.today+"\n3개월 뒤 — "+d.future+"\n걸림돌 — "+d.block+"\n그때의 나 — "+d.plan,
+    ts:Date.now() });
+  markTask("being", true);
+  save();
+  bowl(288, 3.6); buzz([20,60,20]);
+
+  $("#beBody").innerHTML =
+    '<div class="bedone">' +
+      '<div class="ic">🌱</div>' +
+      '<h3>오늘 두 사람을 정했습니다</h3>' +
+      '<div class="quote"><b>오늘의 나</b><p>'+esc(d.today)+'</p></div>' +
+      '<div class="quote fut"><b>3개월 뒤의 나</b><p>'+esc(d.future)+'</p></div>' +
+      '<div class="quote"><b>그게 오면</b><p>'+esc(d.plan)+'</p></div>' +
+      '<button class="btn" id="beDone">좋습니다</button>' +
+    '</div>';
+  $("#beDone").onclick = function(){ beClose(); toast("오늘 Being 완료 ✓"); };
+}
+
+$("#beX").onclick = function(){ beClose(); };
 
 /* ================= 배경음 · 음성 안내 ================= */
 /* 음원 파일을 넣지 않고 WebAudio로 소리를 만든다.
