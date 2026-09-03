@@ -198,6 +198,66 @@ nav button.on{color:var(--acc)}
 .hide{display:none!important}
 .muted{color:var(--dim);font-size:13px}
 .empty{text-align:center;color:var(--dim2);font-size:13px;padding:30px 10px}
+
+/* ================= 게임화 레이어 ================= */
+/* 레벨 바 */
+.lvbar{background:linear-gradient(180deg,#171d24,#141920)}
+.lvtop{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px}
+.lvtop b{font-size:14px;font-weight:800;letter-spacing:-.01em}
+.lvtop b i{font-style:normal;color:var(--acc);margin-right:6px}
+.lvtop span{font-size:11.5px;color:var(--dim2);font-variant-numeric:tabular-nums}
+
+/* 뇌 시각화 */
+.brainbox{padding:6px 0 2px;display:grid;place-items:center}
+.brain{width:100%;max-width:340px;height:auto;display:block}
+.brain .out{fill:#141a21;stroke:#2b3540;stroke-width:2}
+.brain .sulci{stroke:#28323d;stroke-width:1.6;fill:none;stroke-linecap:round}
+.brain .cere{fill:#181f27;stroke:#2b3540;stroke-width:1.6}
+.brain .pfc{fill:var(--acc);opacity:var(--pfcO,.12);transition:opacity 1s ease}
+.brain .pfcline{stroke:var(--acc);stroke-width:2;fill:none;opacity:var(--pfcO,.12);transition:opacity 1s ease}
+.brain .amy{transition:transform 1s ease,fill 1s ease,opacity 1s ease;transform-origin:118px 97px}
+.brain .amyglow{transition:opacity 1s ease,transform 1s ease;transform-origin:118px 97px}
+.brainlab{display:flex;gap:8px;margin-top:12px}
+.brainlab>div{flex:1;background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:11px 12px}
+.brainlab b{display:block;font-size:19px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.brainlab span{font-size:11px;color:var(--dim);display:block;margin-top:1px}
+.brainlab .dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:1px}
+.dot.y{background:var(--acc)} .dot.b{background:var(--calm)}
+
+/* 배지 */
+.badges{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.badge{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:11px 5px;text-align:center}
+.badge .bi{font-size:22px;display:block;filter:grayscale(1);opacity:.28;transition:.35s}
+.badge .bn{display:block;font-size:10px;color:var(--dim2);margin-top:5px;font-weight:700;line-height:1.3}
+.badge.got{border-color:rgba(255,212,0,.35);background:linear-gradient(180deg,rgba(255,212,0,.07),transparent)}
+.badge.got .bi{filter:none;opacity:1}
+.badge.got .bn{color:var(--acc)}
+
+/* 도장 */
+.stamp{position:relative;text-align:center;padding:18px 0 6px}
+.stamp .mk{display:inline-grid;place-items:center;width:96px;height:96px;border-radius:50%;
+  border:3px solid var(--acc);color:var(--acc);font-weight:800;font-size:17px;letter-spacing:-.02em;
+  transform:rotate(-11deg);box-shadow:0 0 34px rgba(255,212,0,.22)}
+.stamp .mk small{display:block;font-size:10px;letter-spacing:.16em;font-weight:800;margin-top:3px;opacity:.75}
+.stamp.off .mk{border-color:#2b3540;color:#3c4753;box-shadow:none}
+
+/* 프리즈 */
+.frz{display:block;font-size:10px;color:var(--calm);margin-top:3px;letter-spacing:.02em}
+
+/* 축하 */
+#confetti{position:fixed;inset:0;z-index:95;pointer-events:none;display:none}
+#confetti.on{display:block}
+.celebrate{position:fixed;inset:0;z-index:96;display:none;place-items:center;padding:26px;
+  background:rgba(7,9,11,.9);backdrop-filter:blur(6px);text-align:center}
+.celebrate.on{display:grid}
+.celebrate .in{animation:pop .5s cubic-bezier(.2,1.3,.4,1)}
+@keyframes pop{from{transform:scale(.82);opacity:0}to{transform:none;opacity:1}}
+.celebrate .big{font-size:58px;line-height:1;margin-bottom:14px}
+.celebrate h3{font-size:25px;font-weight:800;letter-spacing:-.03em;margin-bottom:8px}
+.celebrate p{font-size:14px;color:var(--dim);max-width:300px;margin:0 auto 22px;line-height:1.65}
+.celebrate .lv{color:var(--acc);font-size:12px;font-weight:800;letter-spacing:.18em;margin-bottom:10px}
+.celebrate .btn{max-width:260px;margin:0 auto}
+
 </style>
 </head>
 <body>
@@ -209,11 +269,15 @@ nav button.on{color:var(--acc)}
       <h1 class="h1" id="hTitle">오늘</h1>
       <div class="hsub" id="hSub">전전두피질 켜기 · 편도체 가라앉히기</div>
     </div>
-    <div class="streak"><b id="streakN">0</b><span>일 연속</span></div>
+    <div class="streak"><b id="streakN">0</b><span>일 연속</span><span class="frz hide" id="frzN"></span></div>
   </header>
 
   <!-- ===== TODAY ===== -->
   <section id="v-today">
+    <div class="card tight lvbar" id="lvCard">
+      <div class="lvtop"><b id="lvName"><i>Lv.1</i>알아차림</b><span id="lvXp">0 / 100 XP</span></div>
+      <div class="pbar"><i id="lvFill" style="width:0%"></i></div>
+    </div>
     <div class="card mantra" id="mantraCard">
       <div class="cap">오늘의 만트라</div>
       <div class="line" data-i="0">침착하고 차분하게</div>
@@ -273,6 +337,61 @@ nav button.on{color:var(--acc)}
       <div class="stat"><b id="sMed">0분</b><span>누적 명상</span></div>
       <div class="stat"><b id="sMan">0</b><span>누적 만트라</span></div>
     </div>
+    <div class="sec"><h2>내 뇌의 지금</h2><small>최근 7일 평균</small></div>
+    <div class="card">
+      <div class="brainbox">
+        <svg class="brain" id="brainSvg" viewBox="0 0 200 150" aria-label="전전두피질과 편도체 상태">
+          <defs>
+            <radialGradient id="gPfc" cx="30%" cy="45%" r="70%">
+              <stop offset="0%" stop-color="#fff3ae"/><stop offset="100%" stop-color="#ffd400"/>
+            </radialGradient>
+            <filter id="fBlur" x="-60%" y="-60%" width="220%" height="220%">
+              <feGaussianBlur stdDeviation="7"/>
+            </filter>
+          </defs>
+          <path class="pfc" filter="url(#fBlur)" fill="url(#gPfc)"
+            d="M42,78 C32,54 47,31 71,25 C67,44 61,60 63,79 C61,99 65,113 67,123 C47,119 38,100 42,78 Z"/>
+          <path class="out"
+            d="M42,78 C32,54 47,31 71,25 C89,13 121,13 139,25 C163,31 177,49 173,71
+               C181,87 173,103 159,109 C155,123 139,131 121,127 C105,137 79,135 67,123
+               C47,119 38,100 42,78 Z"/>
+          <path class="pfcline"
+            d="M42,78 C32,54 47,31 71,25 C67,44 61,60 63,79 C61,99 65,113 67,123 C47,119 38,100 42,78 Z"/>
+          <g class="sulci">
+            <path d="M78,34 C88,44 86,58 76,66"/>
+            <path d="M100,28 C108,40 104,54 94,60"/>
+            <path d="M122,30 C132,42 128,56 116,62"/>
+            <path d="M92,78 C104,84 116,80 126,72"/>
+            <path d="M80,96 C94,104 112,102 124,94"/>
+            <path d="M148,44 C158,54 158,68 148,76"/>
+          </g>
+          <circle class="cere" cx="150" cy="115" r="15"/>
+          <ellipse class="amyglow" id="amyGlow" cx="118" cy="97" rx="20" ry="15"
+            filter="url(#fBlur)" fill="#ff5a5a" opacity=".5"/>
+          <ellipse class="amy" id="amyEl" cx="118" cy="97" rx="11" ry="8"
+            transform="rotate(-18 118 97)" fill="#ff5a5a"/>
+        </svg>
+      </div>
+      <div class="brainlab">
+        <div><b id="pfcV">0%</b><span><i class="dot y"></i>전전두피질 활성</span></div>
+        <div><b id="amyV">0%</b><span><i class="dot b"></i>편도체 안정</span></div>
+      </div>
+      <div class="why" style="margin:12px 0 0" id="brainWhy"></div>
+    </div>
+
+    <div class="sec"><h2>오늘의 도장</h2><small id="perfMeta">퍼펙트 0회</small></div>
+    <div class="card">
+      <div class="stamp off" id="stampBox">
+        <div class="mk">완벽<small id="stampDate">TODAY</small></div>
+      </div>
+      <div class="muted" style="text-align:center;margin-top:10px" id="stampTx">
+        오늘 7개를 모두 채우면 도장이 찍힙니다
+      </div>
+    </div>
+
+    <div class="sec"><h2>배지</h2><small id="badgeMeta">0 / 0</small></div>
+    <div class="badges" id="badgeGrid"></div>
+
     <div class="sec"><h2>최근 7일</h2><small>완료한 훈련 수</small></div>
     <div class="card"><div class="bars" id="bars"></div></div>
     <div class="sec"><h2>신경가소성 원리</h2><small>왜 매일인가</small></div>
@@ -320,6 +439,17 @@ nav button.on{color:var(--acc)}
     <div class="l" data-i="2">나는 할 수 있다</div>
   </div>
   <div class="fcnt"><b id="fCnt">0 / 21</b><span>화면을 보며 속으로 따라 읽으세요</span></div>
+</div>
+
+<canvas id="confetti"></canvas>
+<div class="celebrate" id="celebrate">
+  <div class="in">
+    <div class="lv hide" id="celLv"></div>
+    <div class="big" id="celIcon">🎉</div>
+    <h3 id="celH"></h3>
+    <p id="celP"></p>
+    <button class="btn" id="celBtn">좋아요</button>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -403,7 +533,9 @@ var S = load();
 function today(){ var d=new Date(); return d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate()); }
 function p2(n){ return n<10?"0"+n:""+n; }
 function load(){
-  var base = { days:{}, journal:[], totalMed:0, totalMantra:0, best:0, pattern:"46", minutes:5 };
+  var base = { days:{}, journal:[], totalMed:0, totalMantra:0, best:0,
+               pattern:"46", minutes:5, xp:0, perfect:0, badges:{},
+               freeze:{ count:1, lastGrant:null, used:{} } };
   try{
     var raw = localStorage.getItem(KEY);
     if(!raw) return base;
@@ -459,12 +591,15 @@ function dateStr(off){
   var d=new Date(); d.setDate(d.getDate()+off);
   return d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate());
 }
+function alive(k){
+  return (S.days[k] && doneCount(k)>0) || !!(S.freeze.used && S.freeze.used[k]);
+}
 function streak(){
   var n=0, i=0;
-  if(!(S.days[today()] && doneCount(today())>0)) i=-1;   // 오늘 아직이면 어제부터
+  if(!alive(today())) i=-1;   // 오늘 아직이면 어제부터
   for(;;i--){
     var k=dateStr(i);
-    if(S.days[k] && doneCount(k)>0){ n++; } else break;
+    if(alive(k)){ n++; } else break;
     if(n>2000) break;
   }
   return n;
@@ -476,7 +611,10 @@ var TITLES = { today:["오늘","전전두피질 켜기 · 편도체 가라앉히
                log:["기록","내가 놓아준 것 · 감탄한 것"],
                stat:["성장","끊기지 않은 선이 근육이 된다"] };
 
-function renderAll(){ renderToday(); renderStats(); renderStreak(); }
+function renderAll(){
+  renderToday(); renderStats(); renderStreak();
+  renderLevel(); renderBrain(); renderStamp(); renderBadges(); renderFreeze();
+}
 
 function renderStreak(){
   var n=streak();
@@ -591,7 +729,7 @@ function openHabit(h){
       var v=ta.value.trim();
       if(!v){ ta.focus(); toast("한 줄이면 충분합니다"); return; }
       S.journal.unshift({ id:Date.now(), tag:h.tag, text:v, ts:Date.now() });
-      day().tasks[h.id]=true; save(); renderAll(); buzz();
+      markTask(h.id, true); renderAll(); buzz(); collectRewards();
       af.classList.remove("hide");
       btn.textContent="저장됨 ✓"; btn.disabled=true; btn.style.opacity=".6";
       ta.disabled=true;
@@ -609,9 +747,11 @@ function mkToggle(h){
   btn.className="btn ghost"; btn.style.marginTop="10px";
   btn.textContent = t ? "오늘 완료 취소" : "완료로 표시";
   btn.onclick=function(){
-    day().tasks[h.id]=!day().tasks[h.id];
-    save(); renderAll(); buzz(); closeSheet();
-    toast(day().tasks[h.id]?"오늘 "+h.name+" 완료 ✓":"완료를 취소했습니다");
+    var on=!day().tasks[h.id];
+    markTask(h.id, on);
+    renderAll(); buzz(); closeSheet();
+    toast(on?"오늘 "+h.name+" 완료 ✓":"완료를 취소했습니다");
+    collectRewards();
   };
   return btn;
 }
@@ -639,7 +779,7 @@ function startFocus(){
     if(i>=3){
       i=0; mReps++;
       day().mantra++; S.totalMantra++;
-      if(day().mantra>=MANTRA_GOAL) day().tasks.mantra=true;
+      if(day().mantra>=MANTRA_GOAL) markTask("mantra", true);
       save(); renderAll();
       $("#fCnt").textContent=Math.min(mReps,MANTRA_GOAL)+" / "+MANTRA_GOAL;
       if(mReps>=MANTRA_GOAL){
@@ -654,7 +794,7 @@ function startFocus(){
 function stopFocus(){
   clearTimeout(mTimer); mTimer=null;
   $("#focus").classList.remove("on");
-  renderAll();
+  renderAll(); collectRewards();
 }
 $("#fClose").onclick=function(){ stopFocus(); };
 $("#goMantra").onclick=startFocus;
@@ -731,11 +871,13 @@ function medEnd(complete){
   $("#clock").textContent="00:00";
   if(elapsed>20){
     day().med += elapsed; S.totalMed += elapsed;
-    if(day().med>=180) day().tasks.breath=true;
+    addXp(Math.floor(elapsed/60)*XP_MED_MIN);
+    if(day().med>=180) markTask("breath", true);
     save(); renderAll();
   }
   if(complete){ bowl(288,4.2); buzz([30,80,30]); toast("명상 "+S.minutes+"분 완료 ✓"); }
   else if(elapsed>20) toast(Math.round(elapsed/60*10)/10+"분 기록됨");
+  collectRewards();
 }
 $("#medBtn").onclick=medStart;
 $("#medStop").onclick=function(){ medEnd(false); };
@@ -789,12 +931,329 @@ $("#expBtn").onclick=function(){
 };
 $("#resetBtn").onclick=function(){
   if(!confirm("모든 기록과 훈련 이력을 지웁니다. 계속할까요?")) return;
-  S={ days:{}, journal:[], totalMed:0, totalMantra:0, best:0, pattern:"46", minutes:5 };
+  S={ days:{}, journal:[], totalMed:0, totalMantra:0, best:0,
+     pattern:"46", minutes:5, xp:0, perfect:0, badges:{},
+     freeze:{ count:1, lastGrant:null, used:{} } };
+  pendingLevel=0; pendingPerfect=false; queue.length=0;
   save(); renderAll(); renderLog(); renderChips(); toast("초기화했습니다");
 };
 
+
+/* ================= 레벨 ================= */
+var LEVELS = ["알아차림","멈춤","호흡","이완","여유","중심",
+              "균형","단단함","고요","너그러움","자유","무심"];
+function xpForLevel(L){ return 100*L*(L+1)/2; }   // L레벨 도달에 필요한 누적 XP
+function levelInfo(){
+  var L=1;
+  while(L<LEVELS.length && S.xp >= xpForLevel(L)) L++;
+  var lo = L>1 ? xpForLevel(L-1) : 0;
+  var hi = L<LEVELS.length ? xpForLevel(L) : lo;
+  var max = L>=LEVELS.length;
+  return { L:L, name:LEVELS[L-1], lo:lo, hi:hi, max:max,
+           into:S.xp-lo, need:Math.max(1,hi-lo) };
+}
+function addXp(n){
+  var before = levelInfo().L;
+  S.xp = Math.max(0, S.xp + n);
+  var after = levelInfo().L;
+  if(after > before) pendingLevel = after;
+}
+var pendingLevel = 0, pendingPerfect = false;
+
+function renderLevel(){
+  var v = levelInfo();
+  $("#lvName").innerHTML = '<i>Lv.'+v.L+'</i>'+v.name;
+  $("#lvXp").textContent = v.max ? S.xp+" XP · MAX" : (v.into+" / "+v.need+" XP");
+  $("#lvFill").style.width = (v.max?100:Math.round(v.into/v.need*100))+"%";
+}
+
+/* ================= 훈련 완료 처리 ================= */
+var XP_TASK = 10, XP_PERFECT = 30, XP_MED_MIN = 2;
+
+function markTask(id, on){
+  var d = day(), was = !!d.tasks[id];
+  if(was === on) return;
+  d.tasks[id] = on;
+  addXp(on ? XP_TASK : -XP_TASK);
+  if(on) checkPerfect();
+  save();
+}
+function checkPerfect(){
+  var d = day();
+  if(d.perfect) return;
+  if(doneCount() < HABITS.length) return;
+  d.perfect = true;
+  S.perfect++;
+  addXp(XP_PERFECT);
+  pendingPerfect = true;
+  save();
+}
+
+/* ================= 뇌 시각화 ================= */
+/* 평가 창: 최근 7일이되, 앱을 쓴 날이 그보다 적으면 그 기간만 본다.
+   (첫날 7개를 다 한 사람이 14%로 보이는 건 사실과 다르다) */
+function windowDays(){
+  var keys=Object.keys(S.days).filter(function(k){
+    var d=S.days[k];
+    return doneCount(k)>0 || (d.med||0)>0;
+  }).sort();
+  if(!keys.length) return 1;
+  var span = dnum(today()) - dnum(keys[0]) + 1;
+  return Math.max(1, Math.min(7, span));
+}
+function last7(){
+  var o = { done:0, med:0, calm:0 };
+  for(var i=-6;i<=0;i++){
+    var k=dateStr(i), d=S.days[k];
+    if(!d) continue;
+    o.done += doneCount(k);
+    o.med  += d.med||0;
+    ["breath","letgo","kind","calm"].forEach(function(t){ if(d.tasks[t]) o.calm++; });
+  }
+  return o;
+}
+function pfcScore(){
+  var l=last7(), w=windowDays();
+  return Math.min(100, Math.round(l.done/(w*HABITS.length)*100));
+}
+function amyScore(){
+  var l=last7(), w=windowDays();
+  var m = Math.min(1, l.med/(w*300));   // 하루 5분 기준
+  var c = Math.min(1, l.calm/(w*4));    // 진정 계열 훈련 4개 기준
+  return Math.min(100, Math.round((m*0.55 + c*0.45)*100));
+}
+function renderBrain(){
+  var p=pfcScore(), a=amyScore();
+  var svg=$("#brainSvg");
+  svg.style.setProperty("--pfcO", (0.10 + p/100*0.80).toFixed(3));
+  $("#pfcV").textContent=p+"%";
+  $("#amyV").textContent=a+"%";
+
+  // 편도체: 안정될수록 작아지고 붉은빛 → 푸른빛
+  var sc = (1.30 - a/100*0.62).toFixed(3);
+  var el=$("#amyEl"), gl=$("#amyGlow");
+  el.style.transform="scale("+sc+")";
+  gl.style.transform="scale("+sc+")";
+  // 붉은 경보 → 회색 → 푸른 진정 (중간이 보랏빛으로 탁해지지 않도록 2단계)
+  var t=a/100, col;
+  function mix(c1,c2,u){
+    return "rgb("+Math.round(c1[0]+(c2[0]-c1[0])*u)+","+
+                  Math.round(c1[1]+(c2[1]-c1[1])*u)+","+
+                  Math.round(c1[2]+(c2[2]-c1[2])*u)+")";
+  }
+  if(t<0.5) col=mix([255,90,90],[124,132,144], t/0.5);
+  else      col=mix([124,132,144],[124,195,255], (t-0.5)/0.5);
+  el.setAttribute("fill", col);
+  gl.setAttribute("fill", col);
+  gl.setAttribute("opacity", (0.55 - t*0.38).toFixed(2));
+
+  var msg;
+  if(p<25)      msg="아직 신호가 약합니다. <b>오늘 하나만</b> 해도 회로는 켜집니다.";
+  else if(p<55) msg="회로가 켜지기 시작했습니다. 지금은 <b>강도보다 빈도</b>가 중요합니다.";
+  else if(p<80) msg="전전두피질이 꾸준히 활성화되고 있습니다. <b>이 리듬을 지키세요.</b>";
+  else          msg="아주 좋습니다. 이 정도 빈도면 <b>기본값 자체가 바뀌는 구간</b>입니다.";
+  if(a<30)      msg += " 다만 편도체가 아직 예민합니다 — <b>날숨이 긴 호흡</b>을 늘려보세요.";
+  else if(a>=70)msg += " 편도체도 충분히 가라앉아 있습니다.";
+  $("#brainWhy").innerHTML=msg;
+}
+
+/* ================= 도장 ================= */
+function renderStamp(){
+  var d=day(), on=!!d.perfect;
+  $("#stampBox").classList.toggle("off", !on);
+  var dt=new Date();
+  $("#stampDate").textContent=(dt.getMonth()+1)+"."+dt.getDate();
+  $("#perfMeta").textContent="퍼펙트 "+S.perfect+"회";
+  $("#stampTx").textContent = on
+    ? "오늘 7개를 전부 채웠습니다. 잘하셨습니다."
+    : "오늘 "+doneCount()+"/"+HABITS.length+" — 모두 채우면 도장이 찍힙니다";
+}
+
+/* ================= 배지 ================= */
+var BADGES = [
+  { id:"first", icon:"👣", name:"첫 발자국",
+    cond:function(){ return S.xp>0; },
+    desc:"시작했습니다. 뇌에는 '한 번도 안 해본 일'과 '한 번 해본 일' 사이에 아주 큰 차이가 있습니다." },
+  { id:"d7", icon:"🌱", name:"7일 연속",
+    cond:function(){ return S.best>=7; },
+    desc:"같은 신호가 일주일 반복되면 그 경로의 저항이 눈에 띄게 줄어듭니다. 아직 얇지만, 길이 생겼습니다." },
+  { id:"d21", icon:"🌿", name:"21일 연속",
+    cond:function(){ return S.best>=21; },
+    desc:"흔히 '21일이면 습관'이라고 하지만 그건 통설에 가깝습니다. 실제 연구에서 평균은 훨씬 길었습니다. 그래도 21일은 <b>의식적 노력이 확 줄어드는</b> 첫 지점입니다." },
+  { id:"d66", icon:"🌳", name:"66일 연속",
+    cond:function(){ return S.best>=66; },
+    desc:"습관 형성에 걸린 기간을 추적한 연구에서 나온 <b>평균값이 약 66일</b>이었습니다. 여기서부터는 '하려고 애쓰는 일'이 아니라 그냥 하는 일이 됩니다." },
+  { id:"d100", icon:"🏔", name:"100일 연속",
+    cond:function(){ return S.best>=100; },
+    desc:"100일. 이제 이건 앱의 기록이 아니라 당신의 성격입니다." },
+  { id:"p1", icon:"🎯", name:"첫 퍼펙트",
+    cond:function(){ return S.perfect>=1; },
+    desc:"하루의 7개를 모두 채웠습니다. 전전두피질을 하루 안에 여러 각도로 자극한 날입니다." },
+  { id:"p10", icon:"🏅", name:"퍼펙트 10일",
+    cond:function(){ return S.perfect>=10; },
+    desc:"완벽한 날이 열 번. 예외적인 하루가 아니라 만들 수 있는 하루라는 뜻입니다." },
+  { id:"p30", icon:"👑", name:"퍼펙트 30일",
+    cond:function(){ return S.perfect>=30; },
+    desc:"이 정도면 컨디션이 좋은 날에만 되는 게 아닙니다. 시스템이 생긴 겁니다." },
+  { id:"m100", icon:"🕯", name:"만트라 100회",
+    cond:function(){ return S.totalMantra>=100; },
+    desc:"같은 문장 100번. 불안할 때 먼저 튀어나오는 말이 조금씩 바뀌기 시작합니다." },
+  { id:"m1000", icon:"🔥", name:"만트라 1000회",
+    cond:function(){ return S.totalMantra>=1000; },
+    desc:"1000번. 이제 이 세 문장은 생각이 아니라 반사에 가깝습니다." },
+  { id:"med60", icon:"🌊", name:"명상 60분",
+    cond:function(){ return S.totalMed>=3600; },
+    desc:"누적 한 시간. 긴 날숨이 반복될수록 미주신경의 기본 톤이 올라가고, 편도체가 덜 예민해집니다." },
+  { id:"med600", icon:"🧘", name:"명상 600분",
+    cond:function(){ return S.totalMed>=36000; },
+    desc:"열 시간. 명상 경험이 쌓인 사람에게서 전전두피질과 편도체의 연결이 더 강하게 관찰됩니다. 그 방향으로 가고 있습니다." },
+  { id:"awe30", icon:"✨", name:"감탄 30개",
+    cond:function(){ return S.journal.filter(function(e){return e.tag==="awe";}).length>=30; },
+    desc:"감탄은 자기중심적 사고를 잠시 꺼주는 몇 안 되는 감정입니다. 30번이나 걱정 루프를 끊었습니다." },
+  { id:"let30", icon:"🍃", name:"놓아준 것 30개",
+    cond:function(){ return S.journal.filter(function(e){return e.tag==="letgo";}).length>=30; },
+    desc:"붙잡고 있던 것에 이름을 붙여 30번 내려놓았습니다. 언어로 이름 붙이는 순간 전전두피질이 편도체를 진정시킵니다." },
+  { id:"kind30", icon:"💛", name:"자기존중 30번",
+    cond:function(){ return S.journal.filter(function(e){return e.tag==="kind";}).length>=30; },
+    desc:"자기비난은 뇌가 자신을 위협으로 인식하게 만듭니다. 30번, 그 반대편을 연습했습니다." },
+  { id:"frz", icon:"❄️", name:"다시 시작",
+    cond:function(){ return Object.keys(S.freeze.used||{}).length>=1; },
+    desc:"하루를 놓쳤지만 그만두지 않았습니다. 습관을 무너뜨리는 건 하루의 실패가 아니라 그 뒤의 자책입니다." }
+];
+function renderBadges(){
+  var g=$("#badgeGrid"); g.innerHTML="";
+  var got=0;
+  BADGES.forEach(function(b){
+    var on=!!S.badges[b.id];
+    if(on) got++;
+    var el=document.createElement("button");
+    el.className="badge"+(on?" got":"");
+    el.innerHTML='<span class="bi">'+b.icon+'</span><span class="bn"></span>';
+    el.querySelector(".bn").textContent=b.name;
+    el.onclick=function(){
+      openSheet(b.name, on?"획득함":"아직 잠겨 있습니다", b.desc, function(bd){
+        var x=document.createElement("button");
+        x.className="btn ghost"; x.textContent="닫기"; x.onclick=closeSheet;
+        bd.appendChild(x);
+      });
+    };
+    g.appendChild(el);
+  });
+  $("#badgeMeta").textContent=got+" / "+BADGES.length;
+}
+function checkBadges(){
+  var newly=[];
+  BADGES.forEach(function(b){
+    if(!S.badges[b.id] && b.cond()){ S.badges[b.id]=Date.now(); newly.push(b); }
+  });
+  if(newly.length){ save(); renderBadges(); }
+  return newly;
+}
+
+/* ================= 스트릭 프리즈 ================= */
+function dnum(k){ var p=k.split("-"); return Date.UTC(+p[0],+p[1]-1,+p[2])/86400000; }
+function grantFreeze(){
+  var t=today();
+  if(!S.freeze.lastGrant){ S.freeze.lastGrant=t; save(); return; }
+  var gap=dnum(t)-dnum(S.freeze.lastGrant);
+  if(gap>=7){
+    S.freeze.count=Math.min(2, S.freeze.count+Math.floor(gap/7));
+    S.freeze.lastGrant=t; save();
+  }
+}
+function autoFreeze(){
+  var y=dateStr(-1);
+  if(alive(y)) return;                 // 어제 이미 했음
+  if(!alive(dateStr(-2))) return;      // 연속이 이미 끊겨 있었음
+  if(S.freeze.count<=0) return;
+  S.freeze.count--;
+  S.freeze.used[y]=true;
+  save();
+  setTimeout(function(){ toast("❄ 프리즈로 연속 기록을 지켰습니다"); }, 1100);
+}
+function renderFreeze(){
+  var e=$("#frzN");
+  e.classList.toggle("hide", S.freeze.count<=0);
+  e.textContent="❄ "+S.freeze.count;
+}
+
+/* ================= 축하 연출 ================= */
+var cvs=$("#confetti"), ctx2=null, parts=[], cRaf=null;
+function confetti(){
+  if(!ctx2) ctx2=cvs.getContext("2d");
+  var W=cvs.width=innerWidth, H=cvs.height=innerHeight;
+  cvs.classList.add("on");
+  var cols=["#ffd400","#ffe680","#7cc3ff","#5ad19a","#ff9a6b","#ffffff"];
+  parts=[];
+  for(var i=0;i<110;i++){
+    parts.push({ x:Math.random()*W, y:-20-Math.random()*H*0.5,
+      w:5+Math.random()*7, h:8+Math.random()*10,
+      vy:2.4+Math.random()*3.4, vx:-1.4+Math.random()*2.8,
+      r:Math.random()*Math.PI, vr:-0.16+Math.random()*0.32,
+      c:cols[(Math.random()*cols.length)|0] });
+  }
+  var t0=Date.now();
+  cancelAnimationFrame(cRaf);
+  (function loop(){
+    ctx2.clearRect(0,0,W,H);
+    parts.forEach(function(p){
+      p.x+=p.vx; p.y+=p.vy; p.r+=p.vr; p.vy+=0.045;
+      ctx2.save(); ctx2.translate(p.x,p.y); ctx2.rotate(p.r);
+      ctx2.fillStyle=p.c; ctx2.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx2.restore();
+    });
+    if(Date.now()-t0 < 3400) cRaf=requestAnimationFrame(loop);
+    else { ctx2.clearRect(0,0,W,H); cvs.classList.remove("on"); }
+  })();
+}
+function showCelebrate(o){
+  $("#celLv").textContent=o.lv||"";
+  $("#celLv").classList.toggle("hide", !o.lv);
+  $("#celIcon").textContent=o.icon||"🎉";
+  $("#celH").textContent=o.title||"";
+  $("#celP").innerHTML=o.body||"";
+  $("#celBtn").textContent=o.btn||"좋아요";
+  $("#celebrate").classList.add("on");
+}
+$("#celBtn").onclick=function(){
+  $("#celebrate").classList.remove("on");
+  flushRewards();
+};
+function perfectCard(){
+  return { pop:true, lv:"PERFECT DAY", icon:"🎯", title:"오늘 완벽했습니다",
+    body:"7개를 모두 채웠습니다.<br>오늘 하루, 전전두피질을 여러 방향에서 자극했습니다.<br><b style='color:var(--acc)'>+"+XP_PERFECT+" XP</b>",
+    btn:"고맙습니다" };
+}
+
+/* 레벨업 / 배지 알림을 순서대로 흘려보내기 */
+var queue=[];
+function flushRewards(){
+  if($("#celebrate").classList.contains("on")) return;
+  if(!queue.length) return;
+  var o=queue.shift();
+  showCelebrate(o);
+  if(o.pop){ confetti(); bowl(o.lv==="PERFECT DAY"?288:324,3.6); buzz([25,70,25]); }
+}
+function collectRewards(){
+  if(pendingPerfect){ queue.push(perfectCard()); pendingPerfect=false; }
+  if(pendingLevel){
+    var nm=LEVELS[pendingLevel-1];
+    queue.push({ pop:true, lv:"LEVEL UP", icon:"🧠",
+      title:"Lv."+pendingLevel+" "+nm,
+      body:"마음근육이 한 단계 자랐습니다.<br>같은 자극을 반복할수록 그 회로만 굵어집니다 — 이게 신경가소성입니다." });
+    pendingLevel=0;
+  }
+  checkBadges().forEach(function(b){
+    queue.push({ icon:b.icon, lv:"NEW BADGE", title:b.name, body:b.desc });
+  });
+  flushRewards();
+}
+
 /* ========== 시작 ========== */
-day(); save();
+day();
+grantFreeze();
+autoFreeze();
+checkBadges();
+save();
 renderAll(); renderLogFilter();
 
 document.addEventListener("visibilitychange", function(){
