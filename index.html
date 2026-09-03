@@ -705,6 +705,7 @@ function p2(n){ return n<10?"0"+n:""+n; }
 function load(){
   var base = { days:{}, journal:[], totalMed:0, totalMantra:0, best:0, sos:0,
                pattern:"46", minutes:5, snd:"none", voice:false, futureSelf:"",
+               being:{ future:"", block:"", plan:"" },
                xp:0, perfect:0, badges:{},
                freeze:{ count:1, lastGrant:null, used:{} } };
   try{
@@ -712,6 +713,8 @@ function load(){
     if(!raw) return base;
     var o = JSON.parse(raw);
     for(var k in base) if(!(k in o)) o[k]=base[k];
+    if(!o.being) o.being = { future:"", block:"", plan:"" };
+    if(!o.being.future && o.futureSelf) o.being.future = o.futureSelf;   /* 이전 버전에서 옮겨오기 */
     return o;
   }catch(e){ return base; }
 }
@@ -816,7 +819,7 @@ function renderToday(){
       '<span class="chk">✓</span>';
     b.querySelector("b").textContent=h.name;
     b.querySelector(".tx span").textContent =
-      (h.id==="being" && S.futureSelf) ? "3개월 뒤 — "+S.futureSelf : h.desc;
+      (h.id==="being" && S.being.future) ? "3개월 뒤 — "+S.being.future : h.desc;
     b.onclick=function(){ openHabit(h); };
     box.appendChild(b);
   });
@@ -1046,6 +1049,36 @@ var EX_PLAN = [
   "의심이 들면, 나는 지금까지 해온 날짜를 세어보겠다"
 ];
 
+/* 상상 단계의 감각 질문 — 하루에 종류별로 하나씩 */
+var SCENE_SEE = [
+  "무엇이 보이나요?<br>빛은 어떤가요?",
+  "가장 먼저 눈에 들어오는<br><em>색</em>은 무엇인가요?",
+  "손이 닿는 곳에 있는 것<br>하나를 봅니다. 무엇인가요?",
+  "창밖에는<br>무엇이 있나요?",
+  "그 공간은 넓은가요,<br>아늑한가요?"
+];
+var SCENE_HEAR = [
+  "무슨 소리가<br>들리나요?",
+  "지금 어떤 냄새가<br>나나요?",
+  "가장 <em>조용한 것</em>은<br>무엇인가요?",
+  "누군가의 목소리가 들린다면,<br>뭐라고 하고 있나요?",
+  "그 아침의 공기는<br>따뜻한가요, 서늘한가요?"
+];
+var SCENE_BODY = [
+  "몸은 어떤 느낌인가요?<br>어깨는, 호흡은?",
+  "손끝에<br>무엇이 닿아 있나요?",
+  "가슴 한가운데는<br>어떤 느낌인가요?",
+  "발바닥은<br>무엇을 딛고 있나요?",
+  "턱과 눈가의 힘은<br>어떤가요?"
+];
+var SCENE_SELF = [
+  "그 사람의 얼굴을 봅니다.<br>지금 <em>어떤 표정</em>인가요?",
+  "그 사람은 지금<br>어떻게 서 있나요?",
+  "누가 그 모습을 본다면<br>뭐라고 할까요?",
+  "그 사람이 오늘의 나를 본다면<br>무슨 말을 해줄까요?",
+  "그 사람은 무엇을<br>더 이상 걱정하지 않나요?"
+];
+
 var be = { on:false, step:0, t:[], data:{ today:"", future:"", block:"", plan:"" } };
 
 function beClear(){ be.t.forEach(clearTimeout); be.t = []; }
@@ -1054,7 +1087,9 @@ function beWait(fn, ms){ be.t.push(setTimeout(fn, ms)); }
 function beOpen(){
   if(be.on) return;
   be.on = true;
-  be.data = { today:"", future:"", block:"", plan:"" };
+  /* 오늘의 나만 새로 정하고, 미래의 나·걸림돌·계획은 지난번 것을 그대로 가져온다.
+     같은 목표를 반복해서 그려야 그 회로만 굵어진다. */
+  be.data = { today:"", future:S.being.future||"", block:S.being.block||"", plan:S.being.plan||"" };
   $("#being").classList.add("on");
   beGo(1);
 }
@@ -1113,7 +1148,9 @@ function beGo(n){
     $("#beSub").textContent = "3개월 뒤";
     beInput({
       q:"3개월 뒤, 나는 어떤 사람이 되어 있는가?",
-      hint:"'되고 싶다'가 아니라 <b>'되어 있다'</b>로 씁니다. 뇌는 이미 이루어진 문장에 다르게 반응합니다.",
+      hint: be.data.future
+        ? "지난번에 정한 문장입니다. <b>같은 문장을 계속 그리는 것이 핵심입니다</b> — 목표가 매일 바뀌면 어떤 회로도 굵어지지 않습니다. 정말 달라졌을 때만 고치세요."
+        : "'되고 싶다'가 아니라 <b>'되어 있다'</b>로 씁니다. 뇌는 이미 이루어진 문장에 다르게 반응합니다. <b>한 번 정하면 계속 이 문장으로 갑니다.</b>",
       ex: daily(EX_FUTURE, "future"),
       ph:"3개월 뒤 나는 ○○한 사람이다",
       value: be.data.future,
@@ -1125,7 +1162,9 @@ function beGo(n){
     $("#beSub").textContent = "가장 중요한 단계";
     beInput({
       q:"그런데, 나를 막는 건 무엇인가?",
-      hint:"여기가 핵심입니다. 좋은 장면만 그리고 끝내면 뇌가 이미 이룬 걸로 착각해 <b>오히려 덜 움직입니다.</b> 걸림돌을 같이 봐야 상상이 힘이 됩니다.",
+      hint: be.data.block
+        ? "지난번에 적은 걸림돌입니다. 바뀌었으면 고치고, 그대로면 그대로 두세요."
+        : "여기가 핵심입니다. 좋은 장면만 그리고 끝내면 뇌가 이미 이룬 걸로 착각해 <b>오히려 덜 움직입니다.</b> 걸림돌을 같이 봐야 상상이 힘이 됩니다.",
       ex: daily(EX_BLOCK, "block"),
       ph:"내 안에 있는 것 하나만",
       value: be.data.block,
@@ -1157,27 +1196,28 @@ function beScene(){
     ? "읽어드립니다 · 눈을 감아도 됩니다"
     : "천천히 읽으며 그려보세요";
 
+  /* 목적지(내가 정한 문장)는 고정이고, 들어가는 문은 매일 바뀐다.
+     똑같은 장면을 글자 그대로 반복하면 감정 반응이 무뎌지는데(습관화),
+     감각의 통로를 바꾸면 같은 목표가 매번 새로 살아난다. */
   var f = be.data.future;
   var LINES = [
     "눈을 감고,<br>3개월 뒤 그날 아침으로 갑니다.",
     "당신은 지금<br><em>어디에</em> 있나요?",
-    "무엇이 보이나요?<br>빛은 어떤가요?",
-    "무슨 소리가<br>들리나요?",
-    "몸은 어떤 느낌인가요?<br>어깨는, 호흡은?",
-    "그 사람의 얼굴을 봅니다.<br>지금 <em>어떤 표정</em>인가요?",
+    daily(SCENE_SEE,  "see"),
+    daily(SCENE_HEAR, "hear"),
+    daily(SCENE_BODY, "body"),
+    daily(SCENE_SELF, "self"),
     "「나는 <em>"+esc(f)+"</em>다」<br>속으로 세 번 말해보세요.",
     "그 느낌을 기억하세요.<br>이제 천천히 돌아옵니다."
   ];
-  var SAY = [
-    "눈을 감고, 3개월 뒤 그날 아침으로 갑니다.",
-    "당신은 지금 어디에 있나요?",
-    "무엇이 보이나요? 빛은 어떤가요?",
-    "무슨 소리가 들리나요?",
-    "몸은 어떤 느낌인가요? 어깨는, 호흡은?",
-    "그 사람의 얼굴을 봅니다. 지금 어떤 표정인가요?",
-    "나는 "+f+"다. 속으로 세 번 말해보세요.",
-    "그 느낌을 기억하세요. 이제 천천히 돌아옵니다."
-  ];
+  /* 귀로 들을 문장은 화면 문장에서 태그만 걷어내 만든다 */
+  function plain(h){
+    return h.replace(/<br\s*\/?>/gi, " ").replace(/<[^>]+>/g, "")
+            .replace(/&lt;/g,"<").replace(/&gt;/g,">")
+            .replace(/&quot;/g,'"').replace(/&amp;/g,"&")
+            .replace(/[「」]/g,"");
+  }
+  var SAY = LINES.map(plain);
 
   var body = $("#beBody");
   body.innerHTML =
@@ -1224,6 +1264,7 @@ function beFinish(){
 
   var d = be.data;
   S.futureSelf = d.future;
+  S.being = { future:d.future, block:d.block, plan:d.plan };
   S.journal.unshift({ id:Date.now(), tag:"being",
     text:"오늘의 나 — "+d.today+"\n3개월 뒤 — "+d.future+"\n걸림돌 — "+d.block+"\n그때의 나 — "+d.plan,
     ts:Date.now() });
