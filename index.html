@@ -308,6 +308,16 @@ nav button.on{color:var(--acc)}
   font-weight:800;margin-bottom:5px}
 .bedone .quote p{font-size:15px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
 .bedone .quote.fut p{color:var(--ok);font-weight:700}
+/* 음량 슬라이더 */
+.vol{display:flex;align-items:center;gap:11px;margin-top:2px}
+.vol input[type=range]{flex:1;-webkit-appearance:none;appearance:none;height:26px;background:transparent}
+.vol input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:99px;background:#242c35}
+.vol input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;margin-top:-8px;
+  border-radius:50%;background:var(--acc);border:none;box-shadow:0 2px 8px rgba(0,0,0,.5)}
+.vol input[type=range]::-moz-range-track{height:6px;border-radius:99px;background:#242c35}
+.vol input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--acc);border:none}
+.vol b{font-size:12px;color:var(--dim);width:38px;text-align:right;font-variant-numeric:tabular-nums}
+.vol span{font-size:15px;opacity:.65}
 .hide{display:none!important}
 .muted{color:var(--dim);font-size:13px}
 .empty{text-align:center;color:var(--dim2);font-size:13px;padding:30px 10px}
@@ -417,8 +427,15 @@ nav button.on{color:var(--acc)}
       <div class="chips" id="minChips"></div>
       <div class="pmeta" style="margin:16px 0 8px"><span>배경음</span><span id="sndHint"></span></div>
       <div class="chips" id="sndChips"></div>
+      <div class="vol" id="volRow">
+        <span>🔈</span>
+        <input type="range" id="volRange" min="0" max="100" step="5" aria-label="배경음 크기">
+        <b id="volNum">70%</b>
+      </div>
       <div class="pmeta" style="margin:16px 0 8px"><span>음성 안내</span><span id="voiceHint"></span></div>
       <div class="chips" id="voiceChips"></div>
+      <div class="pmeta" style="margin:14px 0 8px"><span>목소리</span><span id="vnHint"></span></div>
+      <div class="chips" id="vnChips"></div>
     </div>
     <div class="card">
       <div class="breathwrap">
@@ -704,7 +721,8 @@ function today(){ var d=new Date(); return d.getFullYear()+"-"+p2(d.getMonth()+1
 function p2(n){ return n<10?"0"+n:""+n; }
 function load(){
   var base = { days:{}, journal:[], totalMed:0, totalMantra:0, best:0, sos:0,
-               pattern:"46", minutes:5, snd:"none", voice:false, futureSelf:"",
+               pattern:"46", minutes:5, snd:"none", voice:false, vol:0.7, voiceName:"",
+               futureSelf:"",
                being:{ future:"", block:"", plan:"" },
                xp:0, perfect:0, badges:{},
                freeze:{ count:1, lastGrant:null, used:{} } };
@@ -1305,7 +1323,8 @@ function noise(){
   noiseBuf = b; return b;
 }
 
-var amb = { id:"none", nodes:[], gain:null }, ambT = null;
+var amb = { id:"none", nodes:[], gain:null, base:0 }, ambT = null;
+function ambTarget(){ return amb.base * (S.vol==null ? 0.7 : S.vol); }
 
 function ambStop(quick){
   var g = amb.gain, ns = amb.nodes;
@@ -1332,48 +1351,66 @@ function ambStart(id){
   g.gain.setValueAtTime(0.0001, t);
   g.connect(AC.destination);
   amb.gain = g; amb.nodes = [];
-  var target = 0.07;
+
+  /* 폰 스피커는 대체로 500Hz 아래를 거의 못 낸다.
+     낮고 그윽한 소리가 이어폰에서만 들리고 스피커에서는 사라지므로,
+     기본음과 필터를 스피커가 실제로 재생하는 대역으로 올린다. */
+  /* 숨결(트레몰로)은 마스터 게인에 더하지 않고 앞단의 전용 노드에 건다.
+     마스터에 직접 더하면 음량을 줄여도 흔들림 폭은 그대로라 슬라이더가 제대로 안 먹는다. */
+  var trem = AC.createGain(); trem.gain.value = 1; trem.connect(g);
 
   if(id === "bowl"){
-    /* 싱잉볼의 배음 구조를 그대로 쌓고, 아주 느린 숨결을 얹는다 */
-    var lp = AC.createBiquadFilter(); lp.type="lowpass"; lp.frequency.value=1400; lp.connect(g);
-    [[1,1],[2.01,.30],[2.99,.15],[4.21,.06]].forEach(function(p){
+    var lp = AC.createBiquadFilter(); lp.type="lowpass"; lp.frequency.value=3000; lp.connect(trem);
+    /* 기본음(288Hz)은 폰 스피커가 못 내므로 힘을 빼고, 2배음(579Hz)이 소리를 이끌게 한다.
+       실제 싱잉볼도 사람이 듣는 음높이는 배음이 만든다. */
+    [[1,.42],[2.01,1],[2.99,.58],[4.21,.24],[5.43,.10]].forEach(function(p){
       var o = AC.createOscillator(), og = AC.createGain();
-      o.type = "sine"; o.frequency.value = 144*p[0];
+      o.type = "sine"; o.frequency.value = 288*p[0];
       o.detune.value = Math.random()*8-4;
       og.gain.value = p[1];
       o.connect(og); og.connect(lp); o.start(t);
       amb.nodes.push(o);
     });
     var lf = AC.createOscillator(), la = AC.createGain();
-    lf.frequency.value = 0.07; la.gain.value = 0.026;
-    lf.connect(la); la.connect(g.gain); lf.start(t);
+    lf.frequency.value = 0.07; la.gain.value = 0.28;
+    lf.connect(la); la.connect(trem.gain); lf.start(t);
     amb.nodes.push(lf);
-    target = 0.075;
+    amb.base = 0.17;
   }
   else if(id === "wave"){
-    /* 노이즈의 저역 컷오프를 아주 느리게 흔들면 파도가 된다 */
     var s = AC.createBufferSource(); s.buffer = noise(); s.loop = true;
-    var lp2 = AC.createBiquadFilter(); lp2.type="lowpass"; lp2.frequency.value=480; lp2.Q.value=.7;
-    s.connect(lp2); lp2.connect(g); s.start(t);
+    /* 400Hz 아래는 폰에서 들리지도 않으면서 헤드룸만 먹는다 — 잘라낸다 */
+    var hp0 = AC.createBiquadFilter(); hp0.type="highpass"; hp0.frequency.value=400;
+    var lp2 = AC.createBiquadFilter(); lp2.type="lowpass"; lp2.frequency.value=1300; lp2.Q.value=.7;
+    s.connect(hp0); hp0.connect(lp2); lp2.connect(trem); s.start(t);
     var f1 = AC.createOscillator(), a1 = AC.createGain();
-    f1.frequency.value = 0.09; a1.gain.value = 330;
+    f1.frequency.value = 0.09; a1.gain.value = 700;   /* 600~2000Hz를 오간다 */
     f1.connect(a1); a1.connect(lp2.frequency); f1.start(t);
     var f2 = AC.createOscillator(), a2 = AC.createGain();
-    f2.frequency.value = 0.09; a2.gain.value = 0.045;
-    f2.connect(a2); a2.connect(g.gain); f2.start(t);
+    f2.frequency.value = 0.09; a2.gain.value = 0.38;
+    f2.connect(a2); a2.connect(trem.gain); f2.start(t);
     amb.nodes.push(s, f1, f2);
-    target = 0.10;
+    amb.base = 0.34;
   }
   else if(id === "rain"){
     var s2 = AC.createBufferSource(); s2.buffer = noise(); s2.loop = true;
-    var hp = AC.createBiquadFilter(); hp.type="highpass"; hp.frequency.value=900;
-    var lp3 = AC.createBiquadFilter(); lp3.type="lowpass"; lp3.frequency.value=6500;
-    s2.connect(hp); hp.connect(lp3); lp3.connect(g); s2.start(t);
+    var hp = AC.createBiquadFilter(); hp.type="highpass"; hp.frequency.value=1200;
+    var lp3 = AC.createBiquadFilter(); lp3.type="lowpass"; lp3.frequency.value=8000;
+    s2.connect(hp); hp.connect(lp3); lp3.connect(trem); s2.start(t);
     amb.nodes.push(s2);
-    target = 0.055;
+    amb.base = 0.22;
   }
-  g.gain.linearRampToValueAtTime(target, t+2.2);
+  g.gain.linearRampToValueAtTime(ambTarget(), t+2.2);
+}
+
+function ambVolume(){
+  if(!amb.gain || !AC) return;
+  var t = AC.currentTime;
+  try{
+    amb.gain.gain.cancelScheduledValues(t);
+    amb.gain.gain.setValueAtTime(Math.max(0.0001, amb.gain.gain.value), t);
+    amb.gain.gain.linearRampToValueAtTime(Math.max(0.0001, ambTarget()), t+0.25);
+  }catch(e){}
 }
 
 /* 설정에서 눌러보면 8초만 들려주고 스스로 꺼진다 */
@@ -1386,13 +1423,34 @@ function ambPreview(id){
 /* ---- 음성 안내 ---- */
 /* 둘 다 있어야 실제로 소리가 난다 — 하나만 보고 "읽어줍니다"라고 하면 거짓말이 된다 */
 var TTS = { ok:(typeof window.speechSynthesis !== "undefined" &&
-                typeof window.SpeechSynthesisUtterance !== "undefined"), v:null };
+                typeof window.SpeechSynthesisUtterance !== "undefined"), v:null, list:[] };
+/* 기기마다 있는 목소리가 달라서 자동 선택만으로는 보장이 안 된다.
+   여성 목소리를 우선 고르되, 설정에서 직접 고를 수 있게 목록도 만든다. */
+var FEMALE = /yuna|유나|female|여성|여자|sora|소라|heami|해미|nara|jimin|지민|서현|google 한국|ko-kr-x-(ism|ino|sfg)/i;
+var MALE   = /male|남성|남자|minsu|민수|injoon|인준|ko-kr-x-(kob|kod)/i;
+
+function koVoices(){
+  if(!TTS.ok) return [];
+  try{
+    return (window.speechSynthesis.getVoices()||[]).filter(function(v){
+      return /^ko/i.test(v.lang||"");
+    });
+  }catch(e){ return []; }
+}
 function pickVoice(){
   if(!TTS.ok) return;
-  try{
-    var vs = window.speechSynthesis.getVoices() || [];
-    TTS.v = vs.filter(function(v){ return /^ko/i.test(v.lang||""); })[0] || null;
-  }catch(e){}
+  var vs = koVoices();
+  TTS.list = vs;
+  if(!vs.length){ TTS.v = null; return; }
+  /* 사용자가 고른 목소리가 있으면 그것 */
+  if(S.voiceName){
+    for(var i=0;i<vs.length;i++) if(vs[i].name === S.voiceName){ TTS.v = vs[i]; return; }
+  }
+  /* 없으면 여성 → 남성 아닌 것 → 아무거나 */
+  var f = vs.filter(function(v){ return FEMALE.test(v.name||"") || FEMALE.test(v.voiceURI||""); });
+  if(f.length){ TTS.v = f[0]; return; }
+  var nm = vs.filter(function(v){ return !MALE.test(v.name||"") && !MALE.test(v.voiceURI||""); });
+  TTS.v = nm[0] || vs[0];
 }
 if(TTS.ok){
   pickVoice();
@@ -1403,14 +1461,20 @@ function say(text, rate){
   try{
     var u = new SpeechSynthesisUtterance(text);
     if(TTS.v) u.voice = TTS.v;
-    u.lang = "ko-KR"; u.rate = rate || 0.86; u.pitch = 0.98;
+    /* 느리고 살짝 높은 톤이 따뜻하게 들린다. 낮고 빠르면 명령처럼 들린다. */
+    u.lang = "ko-KR"; u.rate = rate || 0.74; u.pitch = 1.10; u.volume = 1;
     window.speechSynthesis.speak(u);
   }catch(e){}
 }
 function hush(){ if(TTS.ok) try{ window.speechSynthesis.cancel(); }catch(e){} }
 
 /* 화면에 쓰는 말과 귀로 듣는 말은 다르다 — 들을 때 자연스러운 쪽으로 */
-var PHASE_SAY = { "들이쉬기":"들이쉬고", "내쉬기":"내쉬고", "멈추기":"그대로" };
+/* "들이쉬고 / 내쉬고"는 짧고 끊겨서 명령처럼 들린다. 권하는 말로 바꾼다. */
+var PHASE_SAY = {
+  "들이쉬기":"천천히, 들이쉬세요",
+  "내쉬기":"부드럽게, 내쉬세요",
+  "멈추기":"그대로 머물러요"
+};
 
 /* ========== 명상 ========== */
 var med={ on:false, t:null, tick:null, endAt:0, si:0 };
@@ -1460,13 +1524,55 @@ function renderChips(){
     b.textContent=o[1];
     b.onclick=function(){
       S.voice=o[0]; save(); renderChips();
-      if(o[0]) say("들이쉬고, 내쉬고."); else hush();
+      if(o[0]) say("이 목소리로 안내해 드릴게요."); else hush();
     };
     vc.appendChild(b);
   });
   $("#voiceHint").textContent = !TTS.ok ? "이 브라우저는 음성을 지원하지 않습니다"
                               : (!TTS.v ? "한국어 음성이 없어 기본 음성으로 읽습니다"
                                         : "호흡과 만트라를 읽어줍니다");
+
+  /* 음량 */
+  var vr = $("#volRange");
+  vr.value = Math.round((S.vol==null?0.7:S.vol)*100);
+  $("#volNum").textContent = vr.value + "%";
+  vr.oninput = function(){
+    S.vol = (+vr.value)/100;
+    $("#volNum").textContent = vr.value + "%";
+    ambVolume();
+    if(!med.on && S.snd!=="none" && !amb.gain) ambPreview(S.snd);
+  };
+  vr.onchange = function(){ save(); };
+
+  /* 목소리 고르기 — 기기마다 있는 목소리가 다르므로 직접 고를 수 있게 */
+  var vn = $("#vnChips"); vn.innerHTML = "";
+  var list = TTS.list || [];
+  if(!list.length){
+    $("#vnHint").textContent = TTS.ok ? "이 기기에 한국어 목소리가 없습니다" : "";
+    vn.classList.add("hide");
+  } else {
+    vn.classList.remove("hide");
+    $("#vnHint").textContent = list.length + "개 중 선택";
+    list.slice(0, 6).forEach(function(v){
+      var b = document.createElement("button");
+      b.className = "chip" + ((TTS.v && TTS.v.name===v.name) ? " on" : "");
+      b.textContent = shortVoice(v.name);
+      b.onclick = function(){
+        S.voiceName = v.name; S.voice = true; save();
+        pickVoice(); renderChips();
+        hush(); say("안녕하세요. 이 목소리로 안내해 드릴게요.");
+      };
+      vn.appendChild(b);
+    });
+  }
+}
+
+/* "Google 한국의" 같은 긴 이름을 칩에 맞게 줄인다 */
+function shortVoice(n){
+  return String(n).replace(/^(Microsoft|Google)\s+/i,"")
+                  .replace(/\s*[-(].*$/,"")
+                  .replace(/\s*(Online|Natural|Desktop).*$/i,"")
+                  .slice(0,14);
 }
 renderChips();
 
@@ -1496,7 +1602,7 @@ function medStart(){
   $("#orb").classList.remove("calm");
   bowl(288,3.2);
   ambStart(S.snd);
-  say("편안히 앉아, 어깨의 힘을 빼세요.");
+  say("편안히 앉으세요. 어깨의 힘을 천천히 내려놓으세요.");
   medPhase();
   med.tick=setInterval(function(){
     var left=Math.max(0, Math.round((med.endAt-Date.now())/1000));
@@ -1527,8 +1633,8 @@ function medEnd(complete){
     bowl(288,4.2); buzz([30,80,30]); toast("명상 "+S.minutes+"분 완료 ✓");
     /* 마무리로 만트라를 읽어준다 — 가장 이완된 상태에서 들어가는 게 가장 깊게 남는다 */
     setTimeout(function(){
-      say("잘하셨습니다.");
-      MANTRA.forEach(function(l){ say(l, 0.78); });
+      say("잘하셨어요. 천천히 돌아오세요.");
+      MANTRA.forEach(function(l){ say(l, 0.68); });
     }, 500);
   }
   else if(elapsed>20) toast(Math.round(elapsed/60*10)/10+"분 기록됨");
