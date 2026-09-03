@@ -368,6 +368,10 @@ nav button.on{color:var(--acc)}
       <div class="chips" id="patChips"></div>
       <div class="pmeta" style="margin:16px 0 8px"><span>시간</span><span></span></div>
       <div class="chips" id="minChips"></div>
+      <div class="pmeta" style="margin:16px 0 8px"><span>배경음</span><span id="sndHint"></span></div>
+      <div class="chips" id="sndChips"></div>
+      <div class="pmeta" style="margin:16px 0 8px"><span>음성 안내</span><span id="voiceHint"></span></div>
+      <div class="chips" id="voiceChips"></div>
     </div>
     <div class="card">
       <div class="breathwrap">
@@ -648,7 +652,7 @@ function today(){ var d=new Date(); return d.getFullYear()+"-"+p2(d.getMonth()+1
 function p2(n){ return n<10?"0"+n:""+n; }
 function load(){
   var base = { days:{}, journal:[], totalMed:0, totalMantra:0, best:0, sos:0,
-               pattern:"46", minutes:5, xp:0, perfect:0, badges:{},
+               pattern:"46", minutes:5, snd:"none", voice:false, xp:0, perfect:0, badges:{},
                freeze:{ count:1, lastGrant:null, used:{} } };
   try{
     var raw = localStorage.getItem(KEY);
@@ -677,10 +681,16 @@ function buzz(ms){ try{ if(navigator.vibrate) navigator.vibrate(ms||18); }catch(
 
 /* 싱잉볼 톤 */
 var AC=null;
-function bowl(freq, dur){
+function ensureAC(){
   try{
     if(!AC) AC = new (window.AudioContext||window.webkitAudioContext)();
     if(AC.state==="suspended") AC.resume();
+    return AC;
+  }catch(e){ return null; }
+}
+function bowl(freq, dur){
+  try{
+    if(!ensureAC()) return;
     var t=AC.currentTime, g=AC.createGain();
     g.gain.setValueAtTime(0,t);
     g.gain.linearRampToValueAtTime(.22,t+.04);
@@ -922,6 +932,132 @@ $("#fClose").onclick=function(){ stopFocus(); };
 $("#goMantra").onclick=startFocus;
 $("#mantraCard").onclick=startFocus;
 
+/* ================= 배경음 · 음성 안내 ================= */
+/* 음원 파일을 넣지 않고 WebAudio로 소리를 만든다.
+   앱 용량이 그대로고, 오프라인에서도 나며, 길이 제한 없이 이어진다. */
+
+var SOUNDS = [
+  { id:"none", name:"없음",   hint:"소리 없이" },
+  { id:"bowl", name:"싱잉볼", hint:"낮은 지속음 · 집중" },
+  { id:"wave", name:"파도",   hint:"밀려왔다 빠지는 호흡" },
+  { id:"rain", name:"빗소리", hint:"고른 소리 · 잡생각 차단" }
+];
+
+var noiseBuf = null;
+function noise(){
+  if(noiseBuf) return noiseBuf;
+  var n = AC.sampleRate*4, b = AC.createBuffer(1, n, AC.sampleRate), d = b.getChannelData(0);
+  for(var i=0;i<n;i++) d[i] = Math.random()*2-1;
+  noiseBuf = b; return b;
+}
+
+var amb = { id:"none", nodes:[], gain:null }, ambT = null;
+
+function ambStop(quick){
+  var g = amb.gain, ns = amb.nodes;
+  amb.gain = null; amb.nodes = []; amb.id = "none";
+  if(!g || !AC) return;
+  var t = AC.currentTime, f = quick ? 0.06 : 1.8;
+  try{
+    g.gain.cancelScheduledValues(t);
+    g.gain.setValueAtTime(Math.max(0.0001, g.gain.value), t);
+    g.gain.linearRampToValueAtTime(0.0001, t+f);
+  }catch(e){}
+  setTimeout(function(){
+    ns.forEach(function(n){ try{ n.stop(0); }catch(e){} try{ n.disconnect(); }catch(e){} });
+    try{ g.disconnect(); }catch(e){}
+  }, f*1000 + 150);
+}
+
+function ambStart(id){
+  ambStop(true);
+  if(id === "none" || !ensureAC()) return;
+  amb.id = id;
+  var t = AC.currentTime;
+  var g = AC.createGain();
+  g.gain.setValueAtTime(0.0001, t);
+  g.connect(AC.destination);
+  amb.gain = g; amb.nodes = [];
+  var target = 0.07;
+
+  if(id === "bowl"){
+    /* 싱잉볼의 배음 구조를 그대로 쌓고, 아주 느린 숨결을 얹는다 */
+    var lp = AC.createBiquadFilter(); lp.type="lowpass"; lp.frequency.value=1400; lp.connect(g);
+    [[1,1],[2.01,.30],[2.99,.15],[4.21,.06]].forEach(function(p){
+      var o = AC.createOscillator(), og = AC.createGain();
+      o.type = "sine"; o.frequency.value = 144*p[0];
+      o.detune.value = Math.random()*8-4;
+      og.gain.value = p[1];
+      o.connect(og); og.connect(lp); o.start(t);
+      amb.nodes.push(o);
+    });
+    var lf = AC.createOscillator(), la = AC.createGain();
+    lf.frequency.value = 0.07; la.gain.value = 0.026;
+    lf.connect(la); la.connect(g.gain); lf.start(t);
+    amb.nodes.push(lf);
+    target = 0.075;
+  }
+  else if(id === "wave"){
+    /* 노이즈의 저역 컷오프를 아주 느리게 흔들면 파도가 된다 */
+    var s = AC.createBufferSource(); s.buffer = noise(); s.loop = true;
+    var lp2 = AC.createBiquadFilter(); lp2.type="lowpass"; lp2.frequency.value=480; lp2.Q.value=.7;
+    s.connect(lp2); lp2.connect(g); s.start(t);
+    var f1 = AC.createOscillator(), a1 = AC.createGain();
+    f1.frequency.value = 0.09; a1.gain.value = 330;
+    f1.connect(a1); a1.connect(lp2.frequency); f1.start(t);
+    var f2 = AC.createOscillator(), a2 = AC.createGain();
+    f2.frequency.value = 0.09; a2.gain.value = 0.045;
+    f2.connect(a2); a2.connect(g.gain); f2.start(t);
+    amb.nodes.push(s, f1, f2);
+    target = 0.10;
+  }
+  else if(id === "rain"){
+    var s2 = AC.createBufferSource(); s2.buffer = noise(); s2.loop = true;
+    var hp = AC.createBiquadFilter(); hp.type="highpass"; hp.frequency.value=900;
+    var lp3 = AC.createBiquadFilter(); lp3.type="lowpass"; lp3.frequency.value=6500;
+    s2.connect(hp); hp.connect(lp3); lp3.connect(g); s2.start(t);
+    amb.nodes.push(s2);
+    target = 0.055;
+  }
+  g.gain.linearRampToValueAtTime(target, t+2.2);
+}
+
+/* 설정에서 눌러보면 8초만 들려주고 스스로 꺼진다 */
+function ambPreview(id){
+  clearTimeout(ambT);
+  ambStart(id);
+  if(id !== "none") ambT = setTimeout(function(){ if(!med.on) ambStop(); }, 8000);
+}
+
+/* ---- 음성 안내 ---- */
+/* 둘 다 있어야 실제로 소리가 난다 — 하나만 보고 "읽어줍니다"라고 하면 거짓말이 된다 */
+var TTS = { ok:(typeof window.speechSynthesis !== "undefined" &&
+                typeof window.SpeechSynthesisUtterance !== "undefined"), v:null };
+function pickVoice(){
+  if(!TTS.ok) return;
+  try{
+    var vs = window.speechSynthesis.getVoices() || [];
+    TTS.v = vs.filter(function(v){ return /^ko/i.test(v.lang||""); })[0] || null;
+  }catch(e){}
+}
+if(TTS.ok){
+  pickVoice();
+  try{ window.speechSynthesis.onvoiceschanged = function(){ pickVoice(); renderChips(); }; }catch(e){}
+}
+function say(text, rate){
+  if(!TTS.ok || !S.voice) return;
+  try{
+    var u = new SpeechSynthesisUtterance(text);
+    if(TTS.v) u.voice = TTS.v;
+    u.lang = "ko-KR"; u.rate = rate || 0.86; u.pitch = 0.98;
+    window.speechSynthesis.speak(u);
+  }catch(e){}
+}
+function hush(){ if(TTS.ok) try{ window.speechSynthesis.cancel(); }catch(e){} }
+
+/* 화면에 쓰는 말과 귀로 듣는 말은 다르다 — 들을 때 자연스러운 쪽으로 */
+var PHASE_SAY = { "들이쉬기":"들이쉬고", "내쉬기":"내쉬고", "멈추기":"그대로" };
+
 /* ========== 명상 ========== */
 var med={ on:false, t:null, tick:null, endAt:0, si:0 };
 
@@ -945,6 +1081,38 @@ function renderChips(){
     b.onclick=function(){ if(med.on) return; S.minutes=m; save(); renderChips(); };
     mc.appendChild(b);
   });
+
+  /* 배경음 — 명상 중에도 바꿀 수 있게 (듣다가 안 맞으면 그 자리에서 바꾸는 게 맞다) */
+  var sc=$("#sndChips"); sc.innerHTML="";
+  SOUNDS.forEach(function(s){
+    var b=document.createElement("button");
+    b.className="chip"+(s.id===S.snd?" on":"");
+    b.textContent=s.name;
+    b.onclick=function(){
+      S.snd=s.id; save(); renderChips();
+      if(med.on) ambStart(s.id); else ambPreview(s.id);
+    };
+    sc.appendChild(b);
+  });
+  var cur=null;
+  SOUNDS.forEach(function(s){ if(s.id===S.snd) cur=s; });
+  $("#sndHint").textContent = cur ? cur.hint : "";
+
+  /* 음성 안내 */
+  var vc=$("#voiceChips"); vc.innerHTML="";
+  [[true,"켜기"],[false,"끄기"]].forEach(function(o){
+    var b=document.createElement("button");
+    b.className="chip"+((!!S.voice)===o[0]?" on":"");
+    b.textContent=o[1];
+    b.onclick=function(){
+      S.voice=o[0]; save(); renderChips();
+      if(o[0]) say("들이쉬고, 내쉬고."); else hush();
+    };
+    vc.appendChild(b);
+  });
+  $("#voiceHint").textContent = !TTS.ok ? "이 브라우저는 음성을 지원하지 않습니다"
+                              : (!TTS.v ? "한국어 음성이 없어 기본 음성으로 읽습니다"
+                                        : "호흡과 만트라를 읽어줍니다");
 }
 renderChips();
 
@@ -959,6 +1127,7 @@ function medPhase(){
   var secs=s[0], nm=s[1];
   $("#phName").textContent=nm;
   $("#phTip").textContent=PHASE_TIP[nm]||"";
+  hush(); say(PHASE_SAY[nm]||nm);
   if(nm==="들이쉬기") setBall(2.05, secs);
   else if(nm==="내쉬기") setBall(1, secs);
   buzz(nm==="내쉬기"?24:12);
@@ -972,6 +1141,8 @@ function medStart(){
   $("#medStop").classList.remove("hide");
   $("#orb").classList.remove("calm");
   bowl(288,3.2);
+  ambStart(S.snd);
+  say("편안히 앉아, 어깨의 힘을 빼세요.");
   medPhase();
   med.tick=setInterval(function(){
     var left=Math.max(0, Math.round((med.endAt-Date.now())/1000));
@@ -984,6 +1155,7 @@ function medEnd(complete){
   if(!med.on) return;
   var elapsed = S.minutes*60 - Math.max(0, Math.round((med.endAt-Date.now())/1000));
   med.on=false; clearTimeout(med.t); clearInterval(med.tick);
+  hush(); ambStop();
   $("#medBtn").classList.remove("hide");
   $("#medStop").classList.add("hide");
   $("#orb").classList.add("calm");
@@ -997,7 +1169,14 @@ function medEnd(complete){
     if(day().med>=180) markTask("breath", true);
     save(); renderAll();
   }
-  if(complete){ bowl(288,4.2); buzz([30,80,30]); toast("명상 "+S.minutes+"분 완료 ✓"); }
+  if(complete){
+    bowl(288,4.2); buzz([30,80,30]); toast("명상 "+S.minutes+"분 완료 ✓");
+    /* 마무리로 만트라를 읽어준다 — 가장 이완된 상태에서 들어가는 게 가장 깊게 남는다 */
+    setTimeout(function(){
+      say("잘하셨습니다.");
+      MANTRA.forEach(function(l){ say(l, 0.78); });
+    }, 500);
+  }
   else if(elapsed>20) toast(Math.round(elapsed/60*10)/10+"분 기록됨");
   collectRewards();
 }
